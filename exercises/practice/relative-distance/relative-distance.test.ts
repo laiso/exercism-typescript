@@ -11,7 +11,7 @@ describe('RelativeDistance', () => {
     expect(actual).toEqual(1)
   })
 
-  xit('Sibling relationship', () => {
+  it('Sibling relationship', () => {
     const familyTree = {
       Dalia: ['Olga', 'Yassin'],
     }
@@ -19,7 +19,7 @@ describe('RelativeDistance', () => {
     expect(actual).toEqual(1)
   })
 
-  xit('Two degrees of separation, grandchild', () => {
+  it('Two degrees of separation, grandchild', () => {
     const familyTree = {
       Khadija: ['Mateo'],
       Mateo: ['Rami'],
@@ -28,7 +28,7 @@ describe('RelativeDistance', () => {
     expect(actual).toEqual(2)
   })
 
-  xit('Unrelated individuals', () => {
+  it('Unrelated individuals', () => {
     const familyTree = {
       Priya: ['Rami'],
       Kaito: ['Elif'],
@@ -37,7 +37,7 @@ describe('RelativeDistance', () => {
     expect(actual).toEqual(-1)
   })
 
-  xit('Complex graph, cousins', () => {
+  it('Complex graph, cousins', () => {
     const familyTree = {
       Aiko: ['Bao', 'Carlos'],
       Bao: ['Dalia', 'Elias'],
@@ -96,7 +96,7 @@ describe('RelativeDistance', () => {
     expect(actual).toEqual(9)
   })
 
-  xit('Complex graph, no shortcut, far removed nephew', () => {
+  it('Complex graph, no shortcut, far removed nephew', () => {
     const familyTree = {
       Mina: ['Viktor', 'Wang'],
       Olga: ['Yuki'],
@@ -155,7 +155,7 @@ describe('RelativeDistance', () => {
     expect(actual).toEqual(14)
   })
 
-  xit('Complex graph, some shortcuts, cross-down and cross-up, cousins several times removed', () => {
+  it('Complex graph, some shortcuts, cross-down and cross-up, cousins several times removed', () => {
     const familyTree = {
       Mina: ['Viktor', 'Wang'],
       Olga: ['Yuki'],

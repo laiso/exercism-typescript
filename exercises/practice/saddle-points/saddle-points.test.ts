@@ -13,12 +13,12 @@ describe('Saddle Points', () => {
     ).toEqual(expected)
   })
 
-  xit('Can identify that empty matrix has no saddle points', () => {
+  it('Can identify that empty matrix has no saddle points', () => {
     const expected: number[] = []
     expect(saddlePoints([[]])).toEqual(expected)
   })
 
-  xit('Can identify lack of saddle points when there are none', () => {
+  it('Can identify lack of saddle points when there are none', () => {
     const expected: number[] = []
     expect(
       saddlePoints([
@@ -29,7 +29,7 @@ describe('Saddle Points', () => {
     ).toEqual(expected)
   })
 
-  xit('Can identify multiple saddle points in a column', () => {
+  it('Can identify multiple saddle points in a column', () => {
     const expected = [
       { row: 1, column: 2 },
       { row: 2, column: 2 },
@@ -44,7 +44,7 @@ describe('Saddle Points', () => {
     ).toEqual(expected)
   })
 
-  xit('Can identify multiple saddle points in a row', () => {
+  it('Can identify multiple saddle points in a row', () => {
     const expected = [
       { row: 2, column: 1 },
       { row: 2, column: 2 },
@@ -59,7 +59,7 @@ describe('Saddle Points', () => {
     ).toEqual(expected)
   })
 
-  xit('Can identify saddle point in bottom right corner', () => {
+  it('Can identify saddle point in bottom right corner', () => {
     const expected = [{ row: 3, column: 3 }]
     expect(
       saddlePoints([
@@ -70,7 +70,7 @@ describe('Saddle Points', () => {
     ).toEqual(expected)
   })
 
-  xit('Can identify saddle points in a non square matrix', () => {
+  it('Can identify saddle points in a non square matrix', () => {
     const expected = [
       { row: 1, column: 1 },
       { row: 1, column: 3 },
@@ -83,7 +83,7 @@ describe('Saddle Points', () => {
     ).toEqual(expected)
   })
 
-  xit('Can identify that saddle points in a single column matrix are those with the minimum value', () => {
+  it('Can identify that saddle points in a single column matrix are those with the minimum value', () => {
     const expected = [
       { row: 2, column: 1 },
       { row: 4, column: 1 },
@@ -91,7 +91,7 @@ describe('Saddle Points', () => {
     expect(saddlePoints([[2], [1], [4], [1]])).toEqual(expected)
   })
 
-  xit('Can identify that saddle points in a single row matrix are those with the maximum value', () => {
+  it('Can identify that saddle points in a single row matrix are those with the maximum value', () => {
     const expected = [
       { row: 1, column: 2 },
       { row: 1, column: 4 },

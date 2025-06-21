@@ -8,61 +8,61 @@ describe('Rectangles', () => {
     expect(actual).toEqual(expected)
   })
 
-  xit('no columns', () => {
+  it('no columns', () => {
     const expected = 0
     const actual = count([''])
     expect(actual).toEqual(expected)
   })
 
-  xit('no rectangles', () => {
+  it('no rectangles', () => {
     const expected = 0
     const actual = count([' '])
     expect(actual).toEqual(expected)
   })
 
-  xit('one rectangle', () => {
+  it('one rectangle', () => {
     const expected = 1
     const actual = count(['+-+', '| |', '+-+'])
     expect(actual).toEqual(expected)
   })
 
-  xit('two rectangles without shared parts', () => {
+  it('two rectangles without shared parts', () => {
     const expected = 2
     const actual = count(['  +-+', '  | |', '+-+-+', '| |  ', '+-+  '])
     expect(actual).toEqual(expected)
   })
 
-  xit('five rectangles with shared parts', () => {
+  it('five rectangles with shared parts', () => {
     const expected = 5
     const actual = count(['  +-+', '  | |', '+-+-+', '| | |', '+-+-+'])
     expect(actual).toEqual(expected)
   })
 
-  xit('rectangle of height 1 is counted', () => {
+  it('rectangle of height 1 is counted', () => {
     const expected = 1
     const actual = count(['+--+', '+--+'])
     expect(actual).toEqual(expected)
   })
 
-  xit('rectangle of width 1 is counted', () => {
+  it('rectangle of width 1 is counted', () => {
     const expected = 1
     const actual = count(['++', '||', '++'])
     expect(actual).toEqual(expected)
   })
 
-  xit('1x1 square is counted', () => {
+  it('1x1 square is counted', () => {
     const expected = 1
     const actual = count(['++', '++'])
     expect(actual).toEqual(expected)
   })
 
-  xit('only complete rectangles are counted', () => {
+  it('only complete rectangles are counted', () => {
     const expected = 1
     const actual = count(['  +-+', '    |', '+-+-+', '| | -', '+-+-+'])
     expect(actual).toEqual(expected)
   })
 
-  xit('rectangles can be of different sizes', () => {
+  it('rectangles can be of different sizes', () => {
     const expected = 3
     const actual = count([
       '+------+----+',
@@ -74,7 +74,7 @@ describe('Rectangles', () => {
     expect(actual).toEqual(expected)
   })
 
-  xit('corner is required for a rectangle to be complete', () => {
+  it('corner is required for a rectangle to be complete', () => {
     const expected = 2
     const actual = count([
       '+------+----+',
@@ -86,7 +86,7 @@ describe('Rectangles', () => {
     expect(actual).toEqual(expected)
   })
 
-  xit('large input with many rectangles', () => {
+  it('large input with many rectangles', () => {
     const expected = 60
     const actual = count([
       '+---+--+----+',
@@ -101,7 +101,7 @@ describe('Rectangles', () => {
     expect(actual).toEqual(expected)
   })
 
-  xit('rectangles must have four sides', () => {
+  it('rectangles must have four sides', () => {
     const expected = 5
     const actual = count([
       '+-+ +-+',

@@ -22,12 +22,12 @@ describe('Crypto', () => {
     expect(crypto.ciphertext).toEqual('1')
   })
 
-  xit('9 character plaintext results in 3 chunks of 3 characters', () => {
+  it('9 character plaintext results in 3 chunks of 3 characters', () => {
     const crypto = new Crypto('This is fun!')
     expect(crypto.ciphertext).toEqual('tsf hiu isn')
   })
 
-  xit('8 character plaintext results in 3 chunks, the last one with a trailing space', () => {
+  it('8 character plaintext results in 3 chunks, the last one with a trailing space', () => {
     const crypto = new Crypto('Chill out.')
     expect(crypto.ciphertext).toEqual('clu hlt io ')
   })

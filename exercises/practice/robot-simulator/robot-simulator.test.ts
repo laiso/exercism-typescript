@@ -43,7 +43,7 @@ describe('Robot', () => {
       expect(robot.coordinates).toEqual([-1, -1])
     })
 
-    xit('invalid robot bearing', () => {
+    it('invalid robot bearing', () => {
       const robot = new Robot()
 
       expect(InvalidInputError.prototype).toBeInstanceOf(Error)
@@ -56,7 +56,7 @@ describe('Robot', () => {
   xdescribe('Rotating clockwise', () => {
     const robot = new Robot()
 
-    xit('changes north to east', () => {
+    it('changes north to east', () => {
       robot.place({ direction: 'north', x: 0, y: 0 })
 
       turnRight(robot)
@@ -65,7 +65,7 @@ describe('Robot', () => {
       expect(robot.coordinates).toEqual([0, 0])
     })
 
-    xit('changes east to south', () => {
+    it('changes east to south', () => {
       robot.place({ direction: 'east', x: 0, y: 0 })
 
       turnRight(robot)
@@ -74,7 +74,7 @@ describe('Robot', () => {
       expect(robot.coordinates).toEqual([0, 0])
     })
 
-    xit('changes south to west', () => {
+    it('changes south to west', () => {
       robot.place({ direction: 'south', x: 0, y: 0 })
 
       turnRight(robot)
@@ -83,7 +83,7 @@ describe('Robot', () => {
       expect(robot.coordinates).toEqual([0, 0])
     })
 
-    xit('changes west to north', () => {
+    it('changes west to north', () => {
       robot.place({ direction: 'west', x: 0, y: 0 })
 
       turnRight(robot)
@@ -96,7 +96,7 @@ describe('Robot', () => {
   xdescribe('Rotating counter-clockwise', () => {
     const robot = new Robot()
 
-    xit('changes north to west', () => {
+    it('changes north to west', () => {
       robot.place({ direction: 'north', x: 0, y: 0 })
 
       turnLeft(robot)
@@ -105,7 +105,7 @@ describe('Robot', () => {
       expect(robot.coordinates).toEqual([0, 0])
     })
 
-    xit('changes west to south', () => {
+    it('changes west to south', () => {
       robot.place({ direction: 'west', x: 0, y: 0 })
 
       turnLeft(robot)
@@ -114,7 +114,7 @@ describe('Robot', () => {
       expect(robot.coordinates).toEqual([0, 0])
     })
 
-    xit('changes south to east', () => {
+    it('changes south to east', () => {
       robot.place({ direction: 'south', x: 0, y: 0 })
 
       turnLeft(robot)
@@ -123,7 +123,7 @@ describe('Robot', () => {
       expect(robot.coordinates).toEqual([0, 0])
     })
 
-    xit('changes east to north', () => {
+    it('changes east to north', () => {
       robot.place({ direction: 'east', x: 0, y: 0 })
 
       turnLeft(robot)
@@ -136,7 +136,7 @@ describe('Robot', () => {
   xdescribe('Moving forward one', () => {
     const robot = new Robot()
 
-    xit('advance when facing north', () => {
+    it('advance when facing north', () => {
       robot.place({ direction: 'north', x: 0, y: 0 })
 
       advance(robot)
@@ -145,7 +145,7 @@ describe('Robot', () => {
       expect(robot.bearing).toEqual('north')
     })
 
-    xit('advance when facing south', () => {
+    it('advance when facing south', () => {
       robot.place({ direction: 'south', x: 0, y: 0 })
 
       advance(robot)
@@ -154,7 +154,7 @@ describe('Robot', () => {
       expect(robot.bearing).toEqual('south')
     })
 
-    xit('advance when facing east', () => {
+    it('advance when facing east', () => {
       robot.place({ direction: 'east', x: 0, y: 0 })
 
       advance(robot)
@@ -163,7 +163,7 @@ describe('Robot', () => {
       expect(robot.bearing).toEqual('east')
     })
 
-    xit('advance when facing west', () => {
+    it('advance when facing west', () => {
       robot.place({ direction: 'west', x: 0, y: 0 })
 
       advance(robot)
@@ -176,7 +176,7 @@ describe('Robot', () => {
   xdescribe('Follow series of instructions', () => {
     const robot = new Robot()
 
-    xit('moving east and north from README', () => {
+    it('moving east and north from README', () => {
       robot.place({ x: 7, y: 3, direction: 'north' })
 
       robot.evaluate('RAALAL')
@@ -185,7 +185,7 @@ describe('Robot', () => {
       expect(robot.bearing).toEqual('west')
     })
 
-    xit('moving west and north', () => {
+    it('moving west and north', () => {
       robot.place({ x: 0, y: 0, direction: 'north' })
 
       robot.evaluate('LAAARALA')
@@ -194,7 +194,7 @@ describe('Robot', () => {
       expect(robot.bearing).toEqual('west')
     })
 
-    xit('moving west and south', () => {
+    it('moving west and south', () => {
       robot.place({ x: 2, y: -7, direction: 'east' })
 
       robot.evaluate('RRAAAAALA')
@@ -203,7 +203,7 @@ describe('Robot', () => {
       expect(robot.bearing).toEqual('south')
     })
 
-    xit('moving east and north', () => {
+    it('moving east and north', () => {
       robot.place({ x: 8, y: 4, direction: 'south' })
 
       robot.evaluate('LAAARRRALLLL')
@@ -212,7 +212,7 @@ describe('Robot', () => {
       expect(robot.bearing).toEqual('north')
     })
 
-    xit('instruct many robots', () => {
+    it('instruct many robots', () => {
       const robot1 = new Robot()
       const robot2 = new Robot()
       const robot3 = new Robot()
