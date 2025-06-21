@@ -24,7 +24,7 @@ describe('Make diamond function', () => {
     expect(makeDiamond('A')).toEqual(result)
   })
 
-  xit('test letter C', () => {
+  it('test letter C', () => {
     const result = diamondify`
       ··A··
       ·B·B·
@@ -35,7 +35,7 @@ describe('Make diamond function', () => {
     expect(makeDiamond('C')).toEqual(result)
   })
 
-  xit('test letter E', () => {
+  it('test letter E', () => {
     const result = diamondify`
       ····A····
       ···B·B···

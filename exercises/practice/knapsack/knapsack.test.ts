@@ -11,7 +11,7 @@ describe('Check if max carriable value is returned', () => {
     expect(maximumValue(input)).toEqual(expected)
   })
 
-  xit('One item, but too heavy', () => {
+  it('One item, but too heavy', () => {
     const input = {
       maximumWeight: 10,
       items: [{ weight: 100, value: 1 }],
@@ -20,7 +20,7 @@ describe('Check if max carriable value is returned', () => {
     expect(maximumValue(input)).toEqual(expected)
   })
 
-  xit("Five items. Can't be greedy by weight", () => {
+  it("Five items. Can't be greedy by weight", () => {
     const input = {
       maximumWeight: 10,
       items: [
@@ -35,7 +35,7 @@ describe('Check if max carriable value is returned', () => {
     expect(maximumValue(input)).toEqual(expected)
   })
 
-  xit("Five items. Can't be greedy by value", () => {
+  it("Five items. Can't be greedy by value", () => {
     const input = {
       maximumWeight: 10,
       items: [
@@ -50,7 +50,7 @@ describe('Check if max carriable value is returned', () => {
     expect(maximumValue(input)).toEqual(expected)
   })
 
-  xit('Example knapsack', () => {
+  it('Example knapsack', () => {
     const input = {
       maximumWeight: 10,
       items: [
@@ -64,7 +64,7 @@ describe('Check if max carriable value is returned', () => {
     expect(maximumValue(input)).toEqual(expected)
   })
 
-  xit('8 items', () => {
+  it('8 items', () => {
     const input = {
       maximumWeight: 104,
       items: [
@@ -82,7 +82,7 @@ describe('Check if max carriable value is returned', () => {
     expect(maximumValue(input)).toEqual(expected)
   })
 
-  xit('15 items', () => {
+  it('15 items', () => {
     const input = {
       maximumWeight: 750,
       items: [

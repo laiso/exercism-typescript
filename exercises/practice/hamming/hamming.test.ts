@@ -6,41 +6,41 @@ describe('Hamming', () => {
     expect(compute('', '')).toEqual(0)
   })
 
-  xit('single letter identical strands', () => {
+  it('single letter identical strands', () => {
     expect(compute('A', 'A')).toEqual(0)
   })
 
-  xit('single letter different strands', () => {
+  it('single letter different strands', () => {
     expect(compute('G', 'T')).toEqual(1)
   })
 
-  xit('long identical strands', () => {
+  it('long identical strands', () => {
     expect(compute('GGACTGAAATCTG', 'GGACTGAAATCTG')).toEqual(0)
   })
 
-  xit('long different strands', () => {
+  it('long different strands', () => {
     expect(compute('GGACGGATTCTG', 'AGGACGGATTCT')).toEqual(9)
   })
 
-  xit('disallow first strand longer', () => {
+  it('disallow first strand longer', () => {
     expect(() => {
       compute('AATG', 'AAA')
     }).toThrow('DNA strands must be of equal length.')
   })
 
-  xit('disallow second strand longer', () => {
+  it('disallow second strand longer', () => {
     expect(() => {
       compute('ATA', 'AGTG')
     }).toThrow('DNA strands must be of equal length.')
   })
 
-  xit('disallow empty first strand', () => {
+  it('disallow empty first strand', () => {
     expect(() => {
       compute('', 'G')
     }).toThrow('DNA strands must be of equal length.')
   })
 
-  xit('disallow empty second strand', () => {
+  it('disallow empty second strand', () => {
     expect(() => {
       compute('G', '')
     }).toThrow('DNA strands must be of equal length.')
