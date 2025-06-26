@@ -14,7 +14,7 @@ describe('CustomSet', () => {
     })
   })
 
-  xdescribe('contains: sets can report if they contain an element', () => {
+  describe('contains: sets can report if they contain an element', () => {
     it('nothing is contained in an empty set', () => {
       const actual = new CustomSet().contains(1)
       expect(actual).toBeFalsy()
@@ -31,7 +31,7 @@ describe('CustomSet', () => {
     })
   })
 
-  xdescribe('subset: a set is a subset if all of its elements are contained in the other set', () => {
+  describe('subset: a set is a subset if all of its elements are contained in the other set', () => {
     it('empty set is a subset of another empty set', () => {
       const actual = new CustomSet().subset(new CustomSet())
       expect(actual).toBeTruthy()
@@ -65,7 +65,7 @@ describe('CustomSet', () => {
     })
   })
 
-  xdescribe('disjoint: sets are disjoint if they share no elements', () => {
+  describe('disjoint: sets are disjoint if they share no elements', () => {
     it('the empty set is disjoint with itself', () => {
       const actual = new CustomSet().disjoint(new CustomSet([]))
       expect(actual).toBeTruthy()
@@ -92,7 +92,7 @@ describe('CustomSet', () => {
     })
   })
 
-  xdescribe('eql: sets with the same elements are equal', () => {
+  describe('eql: sets with the same elements are equal', () => {
     it('empty sets are equal', () => {
       const actual = new CustomSet().eql(new CustomSet())
       expect(actual).toBeTruthy()
@@ -119,7 +119,7 @@ describe('CustomSet', () => {
     })
   })
 
-  xdescribe('add: unique elements can be added to a set', () => {
+  describe('add: unique elements can be added to a set', () => {
     it('add to empty set', () => {
       const actual = new CustomSet().add(3)
       const expected = new CustomSet([3])
@@ -139,7 +139,7 @@ describe('CustomSet', () => {
     })
   })
 
-  xdescribe('intersection: returns a set of all shared elements', () => {
+  describe('intersection: returns a set of all shared elements', () => {
     it('intersection of two empty sets is an empty set', () => {
       const actual = new CustomSet().intersection(new CustomSet())
       const expected = new CustomSet()
@@ -175,7 +175,7 @@ describe('CustomSet', () => {
     })
   })
 
-  xdescribe('difference of a set is a set of all elements that are only in the first set', () => {
+  describe('difference of a set is a set of all elements that are only in the first set', () => {
     it('difference of two empty sets is an empty set', () => {
       const actual = new CustomSet().difference(new CustomSet())
       const expected = new CustomSet()
@@ -201,7 +201,7 @@ describe('CustomSet', () => {
     })
   })
 
-  xdescribe('union: returns a set of all elements in either set', () => {
+  describe('union: returns a set of all elements in either set', () => {
     it('union of empty sets is an empty set', () => {
       const actual = new CustomSet().union(new CustomSet())
       const expected = new CustomSet()

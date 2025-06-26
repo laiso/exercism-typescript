@@ -53,7 +53,7 @@ describe('Robot', () => {
     })
   })
 
-  xdescribe('Rotating clockwise', () => {
+  describe('Rotating clockwise', () => {
     const robot = new Robot()
 
     it('changes north to east', () => {
@@ -93,7 +93,7 @@ describe('Robot', () => {
     })
   })
 
-  xdescribe('Rotating counter-clockwise', () => {
+  describe('Rotating counter-clockwise', () => {
     const robot = new Robot()
 
     it('changes north to west', () => {
@@ -133,7 +133,7 @@ describe('Robot', () => {
     })
   })
 
-  xdescribe('Moving forward one', () => {
+  describe('Moving forward one', () => {
     const robot = new Robot()
 
     it('advance when facing north', () => {
@@ -173,7 +173,7 @@ describe('Robot', () => {
     })
   })
 
-  xdescribe('Follow series of instructions', () => {
+  describe('Follow series of instructions', () => {
     const robot = new Robot()
 
     it('moving east and north from README', () => {

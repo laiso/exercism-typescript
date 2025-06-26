@@ -28,7 +28,7 @@ describe('TwoBucket', () => {
     })
   })
 
-  xdescribe('Measure using bucket one of size 7 and bucket two of size 11', () => {
+  describe('Measure using bucket one of size 7 and bucket two of size 11', () => {
     const buckOne = 7
     const buckTwo = 11
     const goal = 2
@@ -50,7 +50,7 @@ describe('TwoBucket', () => {
     })
   })
 
-  xdescribe('Measure one step using bucket one of size 1 and bucket two of size 3', () => {
+  describe('Measure one step using bucket one of size 1 and bucket two of size 3', () => {
     it('start with bucket two', () => {
       const twoBucket = new TwoBucket(1, 3, 3, 'two')
       expect(twoBucket.moves()).toEqual(1)
@@ -59,7 +59,7 @@ describe('TwoBucket', () => {
     })
   })
 
-  xdescribe('Measure using bucket one of size 2 and bucket two of size 3', () => {
+  describe('Measure using bucket one of size 2 and bucket two of size 3', () => {
     it('start with bucket one and end with bucket two', () => {
       const twoBucket = new TwoBucket(2, 3, 3, 'one')
       expect(twoBucket.moves()).toEqual(2)
@@ -68,7 +68,7 @@ describe('TwoBucket', () => {
     })
   })
 
-  xdescribe('Reachability', () => {
+  describe('Reachability', () => {
     const buckOne = 6
     const buckTwo = 15
     const starterBuck = 'one'
@@ -88,7 +88,7 @@ describe('TwoBucket', () => {
     })
   })
 
-  xdescribe('Goal larger than both buckets', () => {
+  describe('Goal larger than both buckets', () => {
     it('Is impossible', () => {
       const twoBucket = new TwoBucket(5, 7, 8, 'one')
       expect(() => twoBucket.moves()).toThrow()

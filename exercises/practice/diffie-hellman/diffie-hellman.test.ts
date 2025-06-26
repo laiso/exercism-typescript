@@ -14,7 +14,7 @@ describe('diffie-hellman', () => {
     }).toThrow()
   })
 
-  xdescribe('input validation', () => {
+  describe('input validation', () => {
     const p = 23
     const g = 5
     const diffieHellman = new DiffieHellman(p, g)
@@ -50,7 +50,7 @@ describe('diffie-hellman', () => {
     })
   })
 
-  xdescribe('stateless calculation', () => {
+  describe('stateless calculation', () => {
     const diffieHellman = new DiffieHellman(23, 5)
 
     const alicePrivateKey = 6
