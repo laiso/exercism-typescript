@@ -8,7 +8,7 @@ describe('Anagram', () => {
   it('no matches', () => {
     const subject = new Anagram('diaper')
     const matches = subject.matches('hello', 'world', 'zombies', 'pants')
-    const expected = []
+    const expected: string[] = []
 
     expect(areSetsEqual(new Set(expected), new Set(matches))).toEqual(true)
   })
@@ -24,7 +24,7 @@ describe('Anagram', () => {
   it('does not detect anagram subsets', () => {
     const subject = new Anagram('good')
     const matches = subject.matches('dog', 'goody')
-    const expected = []
+    const expected: string[] = []
 
     expect(areSetsEqual(new Set(expected), new Set(matches))).toEqual(true)
   })
@@ -63,7 +63,7 @@ describe('Anagram', () => {
   it('does not detect non-anagrams with identical checksum', () => {
     const subject = new Anagram('mass')
     const matches = subject.matches('last')
-    const expected = []
+    const expected: string[] = []
 
     expect(areSetsEqual(new Set(expected), new Set(matches))).toEqual(true)
   })
@@ -95,7 +95,7 @@ describe('Anagram', () => {
   it('does not detect an anagram if the original word is repeated', () => {
     const subject = new Anagram('go')
     const matches = subject.matches('go Go GO')
-    const expected = []
+    const expected: string[] = []
 
     expect(areSetsEqual(new Set(expected), new Set(matches))).toEqual(true)
   })
@@ -103,7 +103,7 @@ describe('Anagram', () => {
   it('anagrams must use all letters exactly once', () => {
     const subject = new Anagram('tapper')
     const matches = subject.matches('patter')
-    const expected = []
+    const expected: string[] = []
 
     expect(areSetsEqual(new Set(expected), new Set(matches))).toEqual(true)
   })
@@ -111,7 +111,7 @@ describe('Anagram', () => {
   it('words are not anagrams of themselves', () => {
     const subject = new Anagram('BANANA')
     const matches = subject.matches('BANANA')
-    const expected = []
+    const expected: string[] = []
 
     expect(areSetsEqual(new Set(expected), new Set(matches))).toEqual(true)
   })
@@ -119,7 +119,7 @@ describe('Anagram', () => {
   it('words are not anagrams of themselves even if letter case is partially different', () => {
     const subject = new Anagram('BANANA')
     const matches = subject.matches('Banana')
-    const expected = []
+    const expected: string[] = []
 
     expect(areSetsEqual(new Set(expected), new Set(matches))).toEqual(true)
   })
@@ -127,7 +127,7 @@ describe('Anagram', () => {
   it('words are not anagrams of themselves even if letter case is completely different', () => {
     const subject = new Anagram('BANANA')
     const matches = subject.matches('Banana')
-    const expected = []
+    const expected: string[] = []
 
     expect(areSetsEqual(new Set(expected), new Set(matches))).toEqual(true)
   })

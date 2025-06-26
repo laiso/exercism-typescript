@@ -33,7 +33,7 @@ describe('ay is added to words that start with vowels', () => {
   })
 })
 
-xdescribe('first letter and ay are moved to the end of words that start with consonants', () => {
+describe('first letter and ay are moved to the end of words that start with consonants', () => {
   it('word beginning with p', () => {
     const expected = 'igpay'
     expect(translate('pig')).toEqual(expected)
@@ -55,7 +55,7 @@ xdescribe('first letter and ay are moved to the end of words that start with con
   })
 })
 
-xdescribe('some letter clusters are treated like a single consonant', () => {
+describe('some letter clusters are treated like a single consonant', () => {
   it('word beginning with ch', () => {
     const expected = 'airchay'
     expect(translate('chair')).toEqual(expected)
@@ -87,7 +87,7 @@ xdescribe('some letter clusters are treated like a single consonant', () => {
   })
 })
 
-xdescribe('position of y in a word determines if it is a consonant or a vowel', () => {
+describe('position of y in a word determines if it is a consonant or a vowel', () => {
   it('y is treated like a consonant at the beginning of a word', () => {
     const expected = 'ellowyay'
     expect(translate('yellow')).toEqual(expected)
@@ -99,7 +99,7 @@ xdescribe('position of y in a word determines if it is a consonant or a vowel', 
   })
 })
 
-xdescribe('phrases are translated', () => {
+describe('phrases are translated', () => {
   it('a whole phrase', () => {
     const expected = 'ickquay astfay unray'
     expect(translate('quick fast run')).toEqual(expected)

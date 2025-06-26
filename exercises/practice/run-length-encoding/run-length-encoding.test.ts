@@ -35,7 +35,7 @@ describe('run-length encode a string', () => {
   })
 })
 
-xdescribe('run-length decode a string', () => {
+describe('run-length decode a string', () => {
   it('empty string', () => {
     const expected = ''
     expect(decode('')).toEqual(expected)
@@ -67,7 +67,7 @@ xdescribe('run-length decode a string', () => {
   })
 })
 
-xdescribe('encode and then decode', () => {
+describe('encode and then decode', () => {
   it('encode followed by decode gives original string', () => {
     expect(decode(encode('zzz ZZ  zZ'))).toEqual('zzz ZZ  zZ')
   })

@@ -29,7 +29,7 @@ describe('Triangle', () => {
     })
   })
 
-  xdescribe('isosceles triangle', () => {
+  describe('isosceles triangle', () => {
     it('last two sides are equal', () => {
       const triangle = new Triangle(3, 4, 4)
       expect(triangle.isIsosceles).toBe(true)
@@ -76,7 +76,7 @@ describe('Triangle', () => {
     })
   })
 
-  xdescribe('scalene triangle', () => {
+  describe('scalene triangle', () => {
     it('no sides are equal', () => {
       const triangle = new Triangle(5, 4, 6)
       expect(triangle.isScalene).toBe(true)

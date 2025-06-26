@@ -15,7 +15,7 @@ describe('color code', () => {
   })
 })
 
-xdescribe('Colors', () => {
+describe('Colors', () => {
   it('returns all colors', () => {
     expect(COLORS).toEqual([
       'black',

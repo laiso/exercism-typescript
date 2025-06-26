@@ -11,7 +11,7 @@ describe('Random key generation', () => {
   })
 })
 
-xdescribe('Random key cipher', () => {
+describe('Random key cipher', () => {
   const simpleCipher = new SimpleCipher()
 
   it('has a key made of letters', () => {
@@ -45,7 +45,7 @@ xdescribe('Random key cipher', () => {
   })
 })
 
-xdescribe('Substitution cipher', () => {
+describe('Substitution cipher', () => {
   const key = 'abcdefghij'
   const simpleCipher = new SimpleCipher(key)
 

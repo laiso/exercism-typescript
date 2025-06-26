@@ -18,7 +18,7 @@ describe('Squares', () => {
     })
   })
 
-  xdescribe('up to 10', () => {
+  describe('up to 10', () => {
     const squares = new Squares(10)
 
     it('gets the square of sum', () => {
@@ -34,7 +34,7 @@ describe('Squares', () => {
     })
   })
 
-  xdescribe('up to 100', () => {
+  describe('up to 100', () => {
     const squares = new Squares(100)
 
     it('gets the square of sum', () => {

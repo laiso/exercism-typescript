@@ -69,7 +69,7 @@ describe('single line grids', () => {
   })
 })
 
-xdescribe('multi line grids', () => {
+describe('multi line grids', () => {
   it('should locate a left to right word in a two line grid', () => {
     const grid = ['jefblpepre', 'clojurermt']
 
@@ -186,7 +186,7 @@ xdescribe('multi line grids', () => {
   })
 })
 
-xdescribe('multiple words', () => {
+describe('multiple words', () => {
   it('should locate two words written left to right', () => {
     const grid = [
       'aefblpepre',
@@ -217,7 +217,7 @@ xdescribe('multiple words', () => {
   })
 })
 
-xdescribe('different directions', () => {
+describe('different directions', () => {
   it('should locate a single word written right to left', () => {
     const grid = ['rixilelhrs']
     const expectedResults = {
@@ -260,7 +260,7 @@ xdescribe('different directions', () => {
   })
 })
 
-xdescribe('vertical directions', () => {
+describe('vertical directions', () => {
   it('should locate words written top to bottom', () => {
     const grid = [
       'jefblpepre',
@@ -552,7 +552,7 @@ xdescribe('vertical directions', () => {
   })
 })
 
-xdescribe('avoiding false-positives', () => {
+describe('avoiding false-positives', () => {
   it('should fail to locate a word that is not in the puzzle', () => {
     const grid = [
       'jefblpepre',
