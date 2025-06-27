@@ -1,4 +1,4 @@
-import { describe, it, expect, xit } from '@jest/globals'
+import { describe, it, expect } from '@jest/globals'
 import { nucleotideCounts } from './nucleotide-count.ts'
 
 describe('count all nucleotides in a strand', () => {

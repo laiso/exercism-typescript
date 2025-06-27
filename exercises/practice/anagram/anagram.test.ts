@@ -1,4 +1,4 @@
-import { describe, it, expect, xit } from '@jest/globals'
+import { describe, it, expect } from '@jest/globals'
 import { Anagram } from './anagram.ts'
 
 const areSetsEqual = <T>(setA: Set<T>, setB: Set<T>): boolean =>

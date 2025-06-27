@@ -1,4 +1,4 @@
-import { describe, it, expect, xit } from '@jest/globals'
+import { describe, it, expect } from '@jest/globals'
 import { translate } from './protein-translation.ts'
 
 describe('Translate input RNA sequences into proteins', () => {

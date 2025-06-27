@@ -1,4 +1,4 @@
-import { describe, it, expect, xit } from '@jest/globals'
+import { describe, it, expect } from '@jest/globals'
 import { BinarySearchTree } from './binary-search-tree.ts'
 
 function recordAllData(bst: BinarySearchTree): unknown[] {

@@ -1,4 +1,4 @@
-import { describe, it, expect, xit } from '@jest/globals'
+import { describe, it, expect } from '@jest/globals'
 import { proverb } from './proverb.ts'
 
 describe('Proverb', () => {

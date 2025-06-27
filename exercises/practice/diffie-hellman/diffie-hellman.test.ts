@@ -1,4 +1,4 @@
-import { describe, xdescribe, it, expect, xit } from '@jest/globals'
+import { describe, xdescribe, it, expect } from '@jest/globals'
 import { DiffieHellman } from './diffie-hellman.ts'
 
 describe('diffie-hellman', () => {

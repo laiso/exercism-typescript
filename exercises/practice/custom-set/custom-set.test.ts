@@ -1,4 +1,4 @@
-import { describe, xdescribe, it, expect, xit } from '@jest/globals'
+import { describe, xdescribe, it, expect } from '@jest/globals'
 import { CustomSet } from './custom-set.ts'
 
 describe('CustomSet', () => {
