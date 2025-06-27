@@ -1,4 +1,4 @@
-import { describe, it, expect, xit } from '@jest/globals'
+import { describe, it, expect } from '@jest/globals'
 import { parse } from './acronym.ts'
 
 describe('Acronym are produced from', () => {

@@ -1,4 +1,4 @@
-import { describe, it, expect, xit } from '@jest/globals'
+import { describe, it, expect } from '@jest/globals'
 import { maximumValue } from './knapsack.ts'
 
 describe('Check if max carriable value is returned', () => {

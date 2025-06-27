@@ -1,4 +1,4 @@
-import { describe, it, expect, xit } from '@jest/globals'
+import { describe, it, expect } from '@jest/globals'
 import { triplets } from './pythagorean-triplet.ts'
 
 type Triplet = [number, number, number]

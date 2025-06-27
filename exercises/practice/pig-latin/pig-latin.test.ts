@@ -1,4 +1,4 @@
-import { describe, xdescribe, it, expect, xit } from '@jest/globals'
+import { describe, xdescribe, it, expect } from '@jest/globals'
 import { translate } from './pig-latin.ts'
 
 describe('ay is added to words that start with vowels', () => {

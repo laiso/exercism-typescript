@@ -1,4 +1,4 @@
-import { describe, xdescribe, it, expect, xit } from '@jest/globals'
+import { describe, xdescribe, it, expect } from '@jest/globals'
 import { square, total } from './grains.ts'
 
 describe('returns the number of grains on the square', () => {

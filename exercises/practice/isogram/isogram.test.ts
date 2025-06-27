@@ -1,4 +1,4 @@
-import { describe, it, expect, xit } from '@jest/globals'
+import { describe, it, expect } from '@jest/globals'
 import { isIsogram } from './isogram.ts'
 
 describe('Check if the given string is an isogram', () => {
