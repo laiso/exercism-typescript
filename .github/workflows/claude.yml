@@ -40,6 +40,8 @@ jobs:
             Bash(corepack yarn *)
             Bash(ls *)
             Bash(rg *)
+            Bash(rm *)
+            Bash(node *)
             Edit
             View
             GlobTool
