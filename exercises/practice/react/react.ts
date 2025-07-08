@@ -122,6 +122,12 @@ function createInput<T>(
   const read: GetterFn<T> = () => {
     if (activeObserver) {
       s.observers.add(activeObserver)
+      if (activeObserver.name === 'callback') {
+        const callbackObserver = activeObserver as any
+        if (callbackObserver.subscribedSubjects) {
+          callbackObserver.subscribedSubjects.add(s)
+        }
+      }
     }
     return s.value
   }
@@ -232,6 +238,12 @@ function createComputed<T>(
   const read: GetterFn<T> = () => {
     if (activeObserver) {
       s.observers.add(activeObserver)
+      if (activeObserver.name === 'callback') {
+        const callbackObserver = activeObserver as any
+        if (callbackObserver.subscribedSubjects) {
+          callbackObserver.subscribedSubjects.add(s)
+        }
+      }
     }
     return s.value
   }
@@ -277,8 +289,26 @@ function createCallback<T>(updateFn: UpdateFn<T>, value?: T): UnsubscribeFn {
     value,
     updateFn: (prevValue) => {
       if (!isActive) return prevValue!
-      return updateFn(prevValue)
+      
+      subscribedSubjects.forEach(subject => {
+        subject.observers.delete(o)
+      })
+      subscribedSubjects.clear()
+      
+      const prevObserver = activeObserver
+      activeObserver = o
+      const newValue = updateFn(prevValue)
+      activeObserver = prevObserver
+      
+      return newValue
     },
+  }
+
+  const originalAddObserver = (subject: Subject<unknown>) => {
+    if (activeObserver === o && isActive) {
+      subscribedSubjects.add(subject)
+      subject.observers.add(o)
+    }
   }
 
   const prevObserver = activeObserver
