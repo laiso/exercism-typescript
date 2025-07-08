@@ -284,9 +284,10 @@ function createCallback<T>(updateFn: UpdateFn<T>, value?: T): UnsubscribeFn {
   let isActive = true
   const subscribedSubjects = new Set<Subject<unknown>>()
   
-  const o: Observer<T> = {
+  const o: Observer<T> & { subscribedSubjects: Set<Subject<unknown>> } = {
     name: 'callback',
     value,
+    subscribedSubjects,
     updateFn: (prevValue) => {
       if (!isActive) return prevValue!
       
@@ -302,13 +303,6 @@ function createCallback<T>(updateFn: UpdateFn<T>, value?: T): UnsubscribeFn {
       
       return newValue
     },
-  }
-
-  const originalAddObserver = (subject: Subject<unknown>) => {
-    if (activeObserver === o && isActive) {
-      subscribedSubjects.add(subject)
-      subject.observers.add(o)
-    }
   }
 
   const prevObserver = activeObserver
