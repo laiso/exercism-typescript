@@ -37,11 +37,7 @@ jobs:
           timeout_minutes: "3600"
           allowed_tools: |
             mcp__github__create_pull_request
-            Bash(corepack yarn *)
-            Bash(ls *)
-            Bash(rg *)
-            Bash(rm *)
-            Bash(node *)
+            Bash
             Edit
             View
             GlobTool
