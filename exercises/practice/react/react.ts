@@ -49,7 +49,7 @@ type Observer<T> = ObserverR & ObserverV<T>
 
 type SubjectR = {
   name?: string
-  observer: ObserverR | undefined
+  observers: Set<ObserverR>
 }
 
 type SubjectV<T> = {
@@ -104,24 +104,35 @@ function updateObserver<T>(observer: Observer<T>): void {
  */
 function createInput<T>(
   value: T,
-  _equal?: boolean | EqualFn<T>,
+  equal?: boolean | EqualFn<T>,
   options?: Options
 ): InputPair<T> {
+  const equalFn: EqualFn<T> | undefined = 
+    equal === true ? (a, b) => a === b :
+    typeof equal === 'function' ? equal :
+    undefined
+
   const s: Subject<T> = {
     name: options?.name,
-    observer: undefined,
+    observers: new Set(),
     value,
-    equalFn: undefined,
+    equalFn,
   }
 
   const read: GetterFn<T> = () => {
-    if (activeObserver) s.observer = activeObserver
+    if (activeObserver) {
+      s.observers.add(activeObserver)
+    }
     return s.value
   }
 
   const write: SetterFn<T> = (nextValue) => {
-    s.value = nextValue
-    if (s.observer) updateObserver(s.observer as Observer<unknown>)
+    const shouldUpdate = !s.equalFn || !s.equalFn(s.value, nextValue)
+    if (shouldUpdate) {
+      s.value = nextValue
+      const observersToUpdate = Array.from(s.observers)
+      observersToUpdate.forEach(observer => updateObserver(observer as Observer<unknown>))
+    }
     return s.value
   }
 
@@ -182,16 +193,50 @@ function createInput<T>(
 function createComputed<T>(
   updateFn: UpdateFn<T>,
   value?: T,
-  _equal?: boolean | EqualFn<T>,
+  equal?: boolean | EqualFn<T>,
   options?: { name?: string }
 ): GetterFn<T> {
+  const equalFn: EqualFn<T> | undefined = 
+    equal === true ? (a, b) => a === b :
+    typeof equal === 'function' ? equal :
+    undefined
+
+  const s: Subject<T> = {
+    name: options?.name,
+    observers: new Set(),
+    value: value as T,
+    equalFn,
+  }
+
   const o: Observer<T> = {
     name: options?.name,
     value,
-    updateFn,
+    updateFn: (prevValue) => {
+      const prevObserver = activeObserver
+      activeObserver = o
+      const newValue = updateFn(prevValue)
+      activeObserver = prevObserver
+      
+      const shouldUpdate = !s.equalFn || !s.equalFn(s.value, newValue)
+      if (shouldUpdate) {
+        s.value = newValue
+        const observersToUpdate = Array.from(s.observers)
+        observersToUpdate.forEach(observer => updateObserver(observer as Observer<unknown>))
+      }
+      return newValue
+    },
   }
+
   updateObserver(o)
-  return (): T => o.value!
+
+  const read: GetterFn<T> = () => {
+    if (activeObserver) {
+      s.observers.add(activeObserver)
+    }
+    return s.value
+  }
+
+  return read
 }
 
 /**
@@ -223,13 +268,26 @@ function createComputed<T>(
  *                 stop receiving updates from the
  *                 subjects it subscribed to.
  */
-function createCallback<T>(_updateFn: UpdateFn<T>, _value?: T): UnsubscribeFn {
-  const observer = {}
-  return ((observer: unknown | undefined) => (): void => {
-    if (!observer) return
-    observer = undefined
-    // i.e. dispose of any active subscriptions
-  })(observer)
+function createCallback<T>(updateFn: UpdateFn<T>, value?: T): UnsubscribeFn {
+  let isActive = true
+  
+  const o: Observer<T> = {
+    name: 'callback',
+    value,
+    updateFn: (prevValue) => {
+      if (!isActive) return prevValue!
+      return updateFn(prevValue)
+    },
+  }
+
+  const prevObserver = activeObserver
+  activeObserver = o
+  o.value = updateFn(value)
+  activeObserver = prevObserver
+
+  return (): void => {
+    isActive = false
+  }
 }
 
 export { createInput, createComputed, createCallback }
