@@ -63,6 +63,7 @@ type Subject<T> = SubjectR & SubjectV<T>
 let activeObserver: ObserverR
 
 let callbackQueue = new Set<Observer<unknown>>()
+let computedQueue = new Set<Observer<unknown>>()
 let isUpdating = false
 
 function updateObserver<T>(observer: Observer<T>): void {
@@ -72,17 +73,29 @@ function updateObserver<T>(observer: Observer<T>): void {
   activeObserver = prevObserver
 }
 
-function flushCallbacks(): void {
-  if (callbackQueue.size === 0) return
+function flushUpdates(): void {
+  while (computedQueue.size > 0) {
+    const computed = Array.from(computedQueue)
+    computedQueue.clear()
+    
+    for (const observer of computed) {
+      const prevObserver = activeObserver
+      activeObserver = observer
+      observer.value = observer.updateFn(observer.value)
+      activeObserver = prevObserver
+    }
+  }
   
-  const callbacks = Array.from(callbackQueue)
-  callbackQueue.clear()
-  
-  for (const callback of callbacks) {
-    const prevObserver = activeObserver
-    activeObserver = callback
-    callback.value = callback.updateFn(callback.value)
-    activeObserver = prevObserver
+  if (callbackQueue.size > 0) {
+    const callbacks = Array.from(callbackQueue)
+    callbackQueue.clear()
+    
+    for (const callback of callbacks) {
+      const prevObserver = activeObserver
+      activeObserver = callback
+      callback.value = callback.updateFn(callback.value)
+      activeObserver = prevObserver
+    }
   }
 }
 
@@ -159,10 +172,16 @@ function createInput<T>(
       
       s.value = nextValue
       const observersToUpdate = Array.from(s.observers)
-      observersToUpdate.forEach(observer => updateObserver(observer as Observer<unknown>))
+      observersToUpdate.forEach(observer => {
+        if (observer.name === 'callback') {
+          callbackQueue.add(observer as Observer<unknown>)
+        } else {
+          computedQueue.add(observer as Observer<unknown>)
+        }
+      })
       
       if (!wasUpdating) {
-        flushCallbacks()
+        flushUpdates()
         isUpdating = false
       }
     }
@@ -255,10 +274,10 @@ function createComputed<T>(
         s.value = newValue
         const observersToUpdate = Array.from(s.observers)
         observersToUpdate.forEach(observer => {
-          if (observer.name === 'callback' && isUpdating) {
+          if (observer.name === 'callback') {
             callbackQueue.add(observer as Observer<unknown>)
           } else {
-            updateObserver(observer as Observer<unknown>)
+            computedQueue.add(observer as Observer<unknown>)
           }
         })
       }
