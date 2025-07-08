@@ -270,6 +270,7 @@ function createComputed<T>(
  */
 function createCallback<T>(updateFn: UpdateFn<T>, value?: T): UnsubscribeFn {
   let isActive = true
+  const subscribedSubjects = new Set<Subject<unknown>>()
   
   const o: Observer<T> = {
     name: 'callback',
@@ -286,7 +287,12 @@ function createCallback<T>(updateFn: UpdateFn<T>, value?: T): UnsubscribeFn {
   activeObserver = prevObserver
 
   return (): void => {
+    if (!isActive) return
     isActive = false
+    subscribedSubjects.forEach(subject => {
+      subject.observers.delete(o)
+    })
+    subscribedSubjects.clear()
   }
 }
 
