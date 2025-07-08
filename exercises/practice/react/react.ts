@@ -77,7 +77,7 @@ function flushUpdates(): void {
   while (computedQueue.size > 0) {
     const computed = Array.from(computedQueue)
     computedQueue.clear()
-    
+
     for (const observer of computed) {
       const prevObserver = activeObserver
       activeObserver = observer
@@ -85,11 +85,11 @@ function flushUpdates(): void {
       activeObserver = prevObserver
     }
   }
-  
+
   if (callbackQueue.size > 0) {
     const callbacks = Array.from(callbackQueue)
     callbackQueue.clear()
-    
+
     for (const callback of callbacks) {
       const prevObserver = activeObserver
       activeObserver = callback
@@ -137,10 +137,12 @@ function createInput<T>(
   equal?: boolean | EqualFn<T>,
   options?: Options
 ): InputPair<T> {
-  const equalFn: EqualFn<T> | undefined = 
-    equal === true ? (a, b) => a === b :
-    typeof equal === 'function' ? equal :
-    undefined
+  const equalFn: EqualFn<T> | undefined =
+    equal === true
+      ? (a, b) => a === b
+      : typeof equal === 'function'
+        ? equal
+        : undefined
 
   const s: Subject<T> = {
     name: options?.name,
@@ -169,17 +171,17 @@ function createInput<T>(
       if (!wasUpdating) {
         isUpdating = true
       }
-      
+
       s.value = nextValue
       const observersToUpdate = Array.from(s.observers)
-      observersToUpdate.forEach(observer => {
+      observersToUpdate.forEach((observer) => {
         if (observer.name === 'callback') {
           callbackQueue.add(observer as Observer<unknown>)
         } else {
           computedQueue.add(observer as Observer<unknown>)
         }
       })
-      
+
       if (!wasUpdating) {
         flushUpdates()
         isUpdating = false
@@ -248,10 +250,12 @@ function createComputed<T>(
   equal?: boolean | EqualFn<T>,
   options?: { name?: string }
 ): GetterFn<T> {
-  const equalFn: EqualFn<T> | undefined = 
-    equal === true ? (a, b) => a === b :
-    typeof equal === 'function' ? equal :
-    undefined
+  const equalFn: EqualFn<T> | undefined =
+    equal === true
+      ? (a, b) => a === b
+      : typeof equal === 'function'
+        ? equal
+        : undefined
 
   const s: Subject<T> = {
     name: options?.name,
@@ -268,12 +272,12 @@ function createComputed<T>(
       activeObserver = o
       const newValue = updateFn(prevValue)
       activeObserver = prevObserver
-      
+
       const shouldUpdate = !s.equalFn || !s.equalFn(s.value, newValue)
       if (shouldUpdate) {
         s.value = newValue
         const observersToUpdate = Array.from(s.observers)
-        observersToUpdate.forEach(observer => {
+        observersToUpdate.forEach((observer) => {
           if (observer.name === 'callback') {
             callbackQueue.add(observer as Observer<unknown>)
           } else {
@@ -336,19 +340,19 @@ function createCallback<T>(updateFn: UpdateFn<T>, value?: T): UnsubscribeFn {
   let isActive = true
   const subscribedSubjects = new Set<Subject<unknown>>()
   let lastValue: T | undefined = value
-  
+
   const o: Observer<T> & { subscribedSubjects: Set<Subject<unknown>> } = {
     name: 'callback',
     value,
     subscribedSubjects,
     updateFn: (prevValue) => {
       if (!isActive) return prevValue!
-      
+
       const prevObserver = activeObserver
       activeObserver = o
       const newValue = updateFn(lastValue)
       activeObserver = prevObserver
-      
+
       lastValue = newValue
       return newValue
     },
@@ -363,7 +367,7 @@ function createCallback<T>(updateFn: UpdateFn<T>, value?: T): UnsubscribeFn {
   return (): void => {
     if (!isActive) return
     isActive = false
-    subscribedSubjects.forEach(subject => {
+    subscribedSubjects.forEach((subject) => {
       subject.observers.delete(o)
     })
     subscribedSubjects.clear()
