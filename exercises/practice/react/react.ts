@@ -62,37 +62,28 @@ type Subject<T> = SubjectR & SubjectV<T>
 // module Context value
 let activeObserver: ObserverR
 
-let updateQueue = new Set<Observer<unknown>>()
+let callbackQueue = new Set<Observer<unknown>>()
 let isUpdating = false
 
 function updateObserver<T>(observer: Observer<T>): void {
-  if (isUpdating) {
-    updateQueue.add(observer as Observer<unknown>)
-    return
-  }
-  
   const prevObserver = activeObserver
   activeObserver = observer
   observer.value = observer.updateFn(observer.value)
   activeObserver = prevObserver
 }
 
-function flushUpdates(): void {
-  if (isUpdating) return
+function flushCallbacks(): void {
+  if (callbackQueue.size === 0) return
   
-  isUpdating = true
-  while (updateQueue.size > 0) {
-    const currentQueue = Array.from(updateQueue)
-    updateQueue.clear()
-    
-    for (const observer of currentQueue) {
-      const prevObserver = activeObserver
-      activeObserver = observer
-      observer.value = observer.updateFn(observer.value)
-      activeObserver = prevObserver
-    }
+  const callbacks = Array.from(callbackQueue)
+  callbackQueue.clear()
+  
+  for (const callback of callbacks) {
+    const prevObserver = activeObserver
+    activeObserver = callback
+    callback.value = callback.updateFn(callback.value)
+    activeObserver = prevObserver
   }
-  isUpdating = false
 }
 
 /**
@@ -161,10 +152,19 @@ function createInput<T>(
   const write: SetterFn<T> = (nextValue) => {
     const shouldUpdate = !s.equalFn || !s.equalFn(s.value, nextValue)
     if (shouldUpdate) {
+      const wasUpdating = isUpdating
+      if (!wasUpdating) {
+        isUpdating = true
+      }
+      
       s.value = nextValue
       const observersToUpdate = Array.from(s.observers)
       observersToUpdate.forEach(observer => updateObserver(observer as Observer<unknown>))
-      flushUpdates()
+      
+      if (!wasUpdating) {
+        flushCallbacks()
+        isUpdating = false
+      }
     }
     return s.value
   }
@@ -254,9 +254,15 @@ function createComputed<T>(
       if (shouldUpdate) {
         s.value = newValue
         const observersToUpdate = Array.from(s.observers)
-        observersToUpdate.forEach(observer => updateObserver(observer as Observer<unknown>))
+        observersToUpdate.forEach(observer => {
+          if (observer.name === 'callback' && isUpdating) {
+            callbackQueue.add(observer as Observer<unknown>)
+          } else {
+            updateObserver(observer as Observer<unknown>)
+          }
+        })
       }
-      return newValue
+      return s.value
     },
   }
 
@@ -310,6 +316,7 @@ function createComputed<T>(
 function createCallback<T>(updateFn: UpdateFn<T>, value?: T): UnsubscribeFn {
   let isActive = true
   const subscribedSubjects = new Set<Subject<unknown>>()
+  let lastValue: T | undefined = value
   
   const o: Observer<T> & { subscribedSubjects: Set<Subject<unknown>> } = {
     name: 'callback',
@@ -318,23 +325,20 @@ function createCallback<T>(updateFn: UpdateFn<T>, value?: T): UnsubscribeFn {
     updateFn: (prevValue) => {
       if (!isActive) return prevValue!
       
-      subscribedSubjects.forEach(subject => {
-        subject.observers.delete(o)
-      })
-      subscribedSubjects.clear()
-      
       const prevObserver = activeObserver
       activeObserver = o
-      const newValue = updateFn(prevValue)
+      const newValue = updateFn(lastValue)
       activeObserver = prevObserver
       
+      lastValue = newValue
       return newValue
     },
   }
 
   const prevObserver = activeObserver
   activeObserver = o
-  o.value = updateFn(value)
+  lastValue = updateFn(value)
+  o.value = lastValue
   activeObserver = prevObserver
 
   return (): void => {
