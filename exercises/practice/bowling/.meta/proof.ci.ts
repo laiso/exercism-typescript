@@ -20,14 +20,13 @@ export class Bowling {
     const frameStart = this.getFrameStart()
     const rollsInCurrentFrame = this.currentRoll - frameStart
     
-    
     if (frameNumber < 9) {
       if (rollsInCurrentFrame === 1 && !this.isStrike(frameStart)) {
         if (this.rolls[frameStart] + pins > 10) {
           throw new Error('Pin count exceeds pins on the lane')
         }
       }
-    }else if (frameNumber === 9) {
+    } else if (frameNumber === 9) {
       if (rollsInCurrentFrame === 1) {
         if (!this.isStrike(frameStart) && this.rolls[frameStart] + pins > 10) {
           throw new Error('Pin count exceeds pins on the lane')
@@ -85,7 +84,7 @@ export class Bowling {
     
     return frame
   }
-
+  
   private getFrameStart(): number {
     let frame = 0
     let rollIndex = 0
