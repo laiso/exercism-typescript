@@ -62,11 +62,37 @@ type Subject<T> = SubjectR & SubjectV<T>
 // module Context value
 let activeObserver: ObserverR
 
+let updateQueue = new Set<Observer<unknown>>()
+let isUpdating = false
+
 function updateObserver<T>(observer: Observer<T>): void {
+  if (isUpdating) {
+    updateQueue.add(observer as Observer<unknown>)
+    return
+  }
+  
   const prevObserver = activeObserver
   activeObserver = observer
   observer.value = observer.updateFn(observer.value)
   activeObserver = prevObserver
+}
+
+function flushUpdates(): void {
+  if (isUpdating) return
+  
+  isUpdating = true
+  while (updateQueue.size > 0) {
+    const currentQueue = Array.from(updateQueue)
+    updateQueue.clear()
+    
+    for (const observer of currentQueue) {
+      const prevObserver = activeObserver
+      activeObserver = observer
+      observer.value = observer.updateFn(observer.value)
+      activeObserver = prevObserver
+    }
+  }
+  isUpdating = false
 }
 
 /**
@@ -138,6 +164,7 @@ function createInput<T>(
       s.value = nextValue
       const observersToUpdate = Array.from(s.observers)
       observersToUpdate.forEach(observer => updateObserver(observer as Observer<unknown>))
+      flushUpdates()
     }
     return s.value
   }
