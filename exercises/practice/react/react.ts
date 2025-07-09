@@ -49,7 +49,7 @@ type Observer<T> = ObserverR & ObserverV<T>
 
 type SubjectR = {
   name?: string
-  observer: ObserverR | undefined
+  observers: Set<ObserverR>
 }
 
 type SubjectV<T> = {
@@ -60,13 +60,69 @@ type SubjectV<T> = {
 type Subject<T> = SubjectR & SubjectV<T>
 
 // module Context value
-let activeObserver: ObserverR
+let activeObserver: ObserverR | undefined
+let updateQueue: Set<Observer<unknown>> = new Set()
+let callbackQueue: Set<Observer<unknown>> = new Set()
 
 function updateObserver<T>(observer: Observer<T>): void {
   const prevObserver = activeObserver
   activeObserver = observer
+  const prevValue = observer.value
   observer.value = observer.updateFn(observer.value)
   activeObserver = prevObserver
+  
+  // If this is a callback observer, add to callback queue (to be called at end)
+  if ('isCallback' in observer && observer.isCallback) {
+    // Only add if this is not the initial call
+    if (prevValue !== undefined) {
+      callbackQueue.add(observer as Observer<unknown>)
+    }
+    return
+  }
+  
+  // For computed observers, check if value changed and notify dependents
+  if ('equalFn' in observer && observer.equalFn && typeof observer.equalFn === 'function' && observer.equalFn(prevValue, observer.value)) {
+    return // Value didn't change, don't notify
+  }
+  
+  // Add dependent observers to update queue
+  if ('observers' in observer && observer.observers && typeof observer.observers.forEach === 'function') {
+    observer.observers.forEach(obs => {
+      if ('updateFn' in obs) {
+        if ('isCallback' in obs && obs.isCallback) {
+          if (!('unsubscribed' in obs) || !obs.unsubscribed) {
+            callbackQueue.add(obs as Observer<unknown>)
+          }
+        } else {
+          updateQueue.add(obs as Observer<unknown>)
+        }
+      }
+    })
+  }
+}
+
+function flushUpdates(): void {
+  // Process all computed updates first
+  while (updateQueue.size > 0) {
+    const batch = Array.from(updateQueue)
+    updateQueue.clear()
+    batch.forEach(observer => updateObserver(observer))
+  }
+  
+  // Then process all callbacks once at the end
+  if (callbackQueue.size > 0) {
+    const callbacks = Array.from(callbackQueue)
+    callbackQueue.clear()
+    callbacks.forEach(observer => {
+      if ('unsubscribed' in observer && observer.unsubscribed) {
+        return // Skip unsubscribed callbacks
+      }
+      const prevObserver = activeObserver
+      activeObserver = observer
+      observer.value = observer.updateFn(observer.value)
+      activeObserver = prevObserver
+    })
+  }
 }
 
 /**
@@ -104,24 +160,51 @@ function updateObserver<T>(observer: Observer<T>): void {
  */
 function createInput<T>(
   value: T,
-  _equal?: boolean | EqualFn<T>,
+  equal?: boolean | EqualFn<T>,
   options?: Options
 ): InputPair<T> {
   const s: Subject<T> = {
     name: options?.name,
-    observer: undefined,
+    observers: new Set(),
     value,
-    equalFn: undefined,
+    equalFn: equal === true ? (a, b) => a === b : equal === false ? undefined : equal,
   }
 
   const read: GetterFn<T> = () => {
-    if (activeObserver) s.observer = activeObserver
+    if (activeObserver) {
+      s.observers.add(activeObserver)
+      // Track subscription for unsubscribe
+      if ('subscribers' in activeObserver && typeof activeObserver.subscribers.add === 'function') {
+        activeObserver.subscribers.add(s)
+      }
+    }
     return s.value
   }
 
   const write: SetterFn<T> = (nextValue) => {
+    const prevValue = s.value
+    if (s.equalFn && s.equalFn(prevValue, nextValue)) {
+      return s.value // Value didn't change
+    }
+    
     s.value = nextValue
-    if (s.observer) updateObserver(s.observer as Observer<unknown>)
+    
+    // Add all observers to update queue
+    s.observers.forEach(obs => {
+      if ('updateFn' in obs) {
+        if ('isCallback' in obs && obs.isCallback) {
+          if (!('unsubscribed' in obs) || !obs.unsubscribed) {
+            updateQueue.add(obs as Observer<unknown>)
+          }
+        } else {
+          updateQueue.add(obs as Observer<unknown>)
+        }
+      }
+    })
+    
+    // Process all updates
+    flushUpdates()
+    
     return s.value
   }
 
@@ -182,16 +265,29 @@ function createInput<T>(
 function createComputed<T>(
   updateFn: UpdateFn<T>,
   value?: T,
-  _equal?: boolean | EqualFn<T>,
+  equal?: boolean | EqualFn<T>,
   options?: { name?: string }
 ): GetterFn<T> {
-  const o: Observer<T> = {
+  const o: Observer<T> & { observers: Set<ObserverR>, equalFn?: EqualFn<T> } = {
     name: options?.name,
     value,
     updateFn,
+    observers: new Set(),
+    equalFn: equal === true ? (a, b) => a === b : equal === false ? undefined : equal,
   }
+  
   updateObserver(o)
-  return (): T => o.value!
+  
+  return (): T => {
+    if (activeObserver) {
+      o.observers.add(activeObserver)
+      // Track subscription for unsubscribe
+      if ('subscribers' in activeObserver && typeof activeObserver.subscribers.add === 'function') {
+        activeObserver.subscribers.add(o)
+      }
+    }
+    return o.value!
+  }
 }
 
 /**
@@ -223,13 +319,31 @@ function createComputed<T>(
  *                 stop receiving updates from the
  *                 subjects it subscribed to.
  */
-function createCallback<T>(_updateFn: UpdateFn<T>, _value?: T): UnsubscribeFn {
-  const observer = {}
-  return ((observer: unknown | undefined) => (): void => {
-    if (!observer) return
-    observer = undefined
-    // i.e. dispose of any active subscriptions
-  })(observer)
+function createCallback<T>(updateFn: UpdateFn<T>, value?: T): UnsubscribeFn {
+  const observer: Observer<T> & { isCallback: boolean, subscribers: Set<Subject<unknown> | Observer<unknown>>, unsubscribed: boolean } = {
+    value,
+    updateFn,
+    isCallback: true,
+    subscribers: new Set(),
+    unsubscribed: false,
+  }
+  
+  // Execute the callback initially to establish dependencies
+  updateObserver(observer)
+  
+  return (): void => {
+    if (observer.unsubscribed) return // Already unsubscribed
+    
+    observer.unsubscribed = true
+    
+    // Remove this observer from all subjects it's subscribed to
+    observer.subscribers.forEach(sub => {
+      if ('observers' in sub) {
+        sub.observers.delete(observer)
+      }
+    })
+    observer.subscribers.clear()
+  }
 }
 
 export { createInput, createComputed, createCallback }
