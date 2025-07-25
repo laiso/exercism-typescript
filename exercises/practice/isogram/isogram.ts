@@ -1,3 +1,17 @@
-export function isIsogram(/* parameters go here */): unknown {
-  throw new Error('Remove this line and implement the function')
+export function isIsogram(word: string): boolean {
+  const seen = new Set<string>()
+  
+  for (const char of word.toLowerCase()) {
+    // Skip spaces and hyphens
+    if (char === ' ' || char === '-') {
+      continue
+    }
+    
+    if (seen.has(char)) {
+      return false
+    }
+    seen.add(char)
+  }
+  
+  return true
 }
