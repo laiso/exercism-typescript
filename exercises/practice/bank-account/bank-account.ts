@@ -10,27 +10,57 @@ export class ValueError extends Error {
 }
 
 export class BankAccount {
-  constructor() {
-    throw new Error('Remove this line and implement the function')
+  private _balance: number = 0
+  private _isOpen: boolean = false
+
+  constructor() {}
+
+  open(): void {
+    if (this._isOpen) {
+      throw new ValueError()
+    }
+    this._isOpen = true
+    this._balance = 0
   }
 
-  open(): unknown {
-    throw new Error('Remove this line and implement the function')
+  close(): void {
+    if (!this._isOpen) {
+      throw new ValueError()
+    }
+    this._isOpen = false
   }
 
-  close(): unknown {
-    throw new Error('Remove this line and implement the function')
+  deposit(amount: number): void {
+    if (!this._isOpen) {
+      throw new ValueError()
+    }
+    if (amount < 0) {
+      throw new ValueError()
+    }
+    this._balance += amount
   }
 
-  deposit(_argument: unknown): unknown {
-    throw new Error('Remove this line and implement the function')
+  withdraw(amount: number): void {
+    if (!this._isOpen) {
+      throw new ValueError()
+    }
+    if (amount < 0) {
+      throw new ValueError()
+    }
+    if (amount > this._balance) {
+      throw new ValueError()
+    }
+    this._balance -= amount
   }
 
-  withdraw(_argument: unknown): unknown {
-    throw new Error('Remove this line and implement the function')
+  get balance(): number {
+    if (!this._isOpen) {
+      throw new ValueError()
+    }
+    return this._balance
   }
 
-  get balance(): unknown {
-    throw new Error('Remove this line and implement the function')
+  set balance(_value: number) {
+    throw new Error('Balance cannot be set directly')
   }
 }

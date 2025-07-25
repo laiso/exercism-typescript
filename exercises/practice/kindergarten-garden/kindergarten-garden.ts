@@ -31,11 +31,32 @@ type Plants = Plant[]
 type Pots = Plants[]
 
 export class Garden {
+  private readonly rows: string[]
+  private readonly students: Student[]
+
   constructor(diagram: string, students = DEFAULT_STUDENTS) {
-    throw new Error('Remove this line and implement the function')
+    this.rows = diagram.split('\n')
+    this.students = [...students].sort() // Sort students alphabetically
   }
 
   public plants(student: Student): Plants {
-    throw new Error('Remove this line and implement the function')
+    const studentIndex = this.students.indexOf(student)
+    if (studentIndex === -1) {
+      return []
+    }
+
+    // Each student gets 2 consecutive pots (starting at studentIndex * 2)
+    const startIndex = studentIndex * 2
+    const plants: Plants = []
+
+    // Get plants from first row
+    plants.push(PLANT_CODES[this.rows[0][startIndex] as keyof typeof PLANT_CODES])
+    plants.push(PLANT_CODES[this.rows[0][startIndex + 1] as keyof typeof PLANT_CODES])
+
+    // Get plants from second row
+    plants.push(PLANT_CODES[this.rows[1][startIndex] as keyof typeof PLANT_CODES])
+    plants.push(PLANT_CODES[this.rows[1][startIndex + 1] as keyof typeof PLANT_CODES])
+
+    return plants
   }
 }

@@ -1,41 +1,46 @@
 export class CustomSet {
-  constructor(initial?: unknown) {
-    throw new Error('Remove this line and implement the function')
+  private elements: number[]
+
+  constructor(initial: number[] = []) {
+    this.elements = [...new Set(initial)].sort((a, b) => a - b)
   }
 
-  empty(): unknown {
-    throw new Error('Remove this line and implement the function')
+  empty(): boolean {
+    return this.elements.length === 0
   }
 
-  contains(element: unknown): unknown {
-    throw new Error('Remove this line and implement the function')
+  contains(element: number): boolean {
+    return this.elements.includes(element)
   }
 
-  add(element: unknown): CustomSet {
-    throw new Error('Remove this line and implement the function')
+  add(element: number): CustomSet {
+    if (!this.contains(element)) {
+      return new CustomSet([...this.elements, element])
+    }
+    return new CustomSet(this.elements)
   }
 
-  subset(other: unknown): CustomSet {
-    throw new Error('Remove this line and implement the function')
+  subset(other: CustomSet): boolean {
+    return this.elements.every(element => other.contains(element))
   }
 
-  disjoint(other: unknown): CustomSet {
-    throw new Error('Remove this line and implement the function')
+  disjoint(other: CustomSet): boolean {
+    return this.elements.every(element => !other.contains(element))
   }
 
-  eql(other: unknown): unknown {
-    throw new Error('Remove this line and implement the function')
+  eql(other: CustomSet): boolean {
+    return this.elements.length === other.elements.length && this.subset(other)
   }
 
-  union(other: unknown): CustomSet {
-    throw new Error('Remove this line and implement the function')
+  union(other: CustomSet): CustomSet {
+    return new CustomSet([...this.elements, ...other.elements])
   }
 
-  intersection(other: unknown): CustomSet {
-    throw new Error('Remove this line and implement the function')
+  intersection(other: CustomSet): CustomSet {
+    return new CustomSet(this.elements.filter(element => other.contains(element)))
   }
 
-  difference(other: unknown): CustomSet {
-    throw new Error('Remove this line and implement the function')
+  difference(other: CustomSet): CustomSet {
+    return new CustomSet(this.elements.filter(element => !other.contains(element)))
   }
 }

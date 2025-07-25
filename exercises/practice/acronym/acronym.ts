@@ -1,3 +1,7 @@
-export function parse(phrase: unknown): unknown {
-  throw new Error('Remove this line and implement the function')
+export function parse(phrase: string): string {
+  return phrase
+    .split(/[\s\-,.:;!?_]+/)
+    .filter(word => word.length > 0)
+    .map(word => word[0].toUpperCase())
+    .join('')
 }

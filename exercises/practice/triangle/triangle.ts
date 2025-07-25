@@ -1,17 +1,30 @@
 export class Triangle {
-  constructor(...sides) {
-    throw new Error('Remove this line and implement the function')
+  private sides: number[]
+
+  constructor(a: number, b: number, c: number) {
+    this.sides = [a, b, c].sort((x, y) => x - y)
   }
 
-  get isEquilateral() {
-    throw new Error('Remove this line and implement the function')
+  private isValidTriangle(): boolean {
+    const [a, b, c] = this.sides
+    return a > 0 && b > 0 && c > 0 && a + b > c
   }
 
-  get isIsosceles() {
-    throw new Error('Remove this line and implement the function')
+  get isEquilateral(): boolean {
+    if (!this.isValidTriangle()) return false
+    const [a, b, c] = this.sides
+    return a === b && b === c
   }
 
-  get isScalene() {
-    throw new Error('Remove this line and implement the function')
+  get isIsosceles(): boolean {
+    if (!this.isValidTriangle()) return false
+    const [a, b, c] = this.sides
+    return a === b || b === c || a === c
+  }
+
+  get isScalene(): boolean {
+    if (!this.isValidTriangle()) return false
+    const [a, b, c] = this.sides
+    return a !== b && b !== c && a !== c
   }
 }
