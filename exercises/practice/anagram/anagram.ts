@@ -1,9 +1,21 @@
 export class Anagram {
-  constructor(input: unknown) {
-    throw new Error('Remove this line and implement the function')
+  private target: string
+
+  constructor(input: string) {
+    this.target = input.toLowerCase()
   }
 
-  public matches(...potentials: unknown[]): unknown {
-    throw new Error('Remove this line and implement the function')
+  private sortedLetters(word: string): string {
+    return word.toLowerCase().split('').sort().join('')
+  }
+
+  public matches(...potentials: string[]): string[] {
+    const targetSorted = this.sortedLetters(this.target)
+    
+    return potentials.filter(candidate => {
+      const candidateLower = candidate.toLowerCase()
+      return candidateLower !== this.target && // Not the same word
+             this.sortedLetters(candidate) === targetSorted // Is anagram
+    })
   }
 }
