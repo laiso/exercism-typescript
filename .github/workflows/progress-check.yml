@@ -1,10 +1,7 @@
 name: Progress Check
 
-on:
-  push:
-    branches: 
-      - "**"
-  
+on: pull_request
+
 jobs:
   progress-check:
     runs-on: ubuntu-22.04
@@ -58,7 +55,7 @@ jobs:
           ADDED_FILES=$(git diff --diff-filter=A --name-only $BASE_REF HEAD | grep -E "exercises/.+\.ts$" | grep -v "\.test\.ts$" || true)
           MODIFIED_FILES=$(git diff --diff-filter=M --name-only $BASE_REF HEAD | grep -E "exercises/.+\.ts$" | grep -v "\.test\.ts$" || true)
           
-                     echo "Changed solution files: $(echo "$CHANGED_FILES" | wc -l) files"
+          echo "Changed solution files: $(echo "$CHANGED_FILES" | wc -l) files"
           
           # Get all exercise directories
           ALL_EXERCISES=$(find exercises/practice exercises/concept -maxdepth 1 -type d -name "*" | grep -v "^exercises/practice$" | grep -v "^exercises/concept$")
@@ -72,29 +69,29 @@ jobs:
           STUB_ONLY=0
           
           # Analyze changed files
-                     for file in $CHANGED_FILES; do
-             if [ -f "$file" ]; then
-               # Check file contents
-               line_count=$(wc -l < "$file" 2>/dev/null || echo "0")
-               has_logic=$(grep -cE "(if|for|while|function|class|=|return)" "$file" 2>/dev/null || echo "0")
+          for file in $CHANGED_FILES; do
+            if [ -f "$file" ]; then
+              # Check file contents
+              line_count=$(wc -l < "$file" 2>/dev/null || echo "0")
+              has_logic=$(grep -cE "(if|for|while|function|class|=|return)" "$file" 2>/dev/null || echo "0")
               
               if [ "$line_count" -gt 5 ] && [ "$has_logic" -gt 2 ]; then
-                                 if echo "$ADDED_FILES" | grep -q "$file"; then
-                   NEWLY_IMPLEMENTED=$((NEWLY_IMPLEMENTED + 1))
-                 elif echo "$MODIFIED_FILES" | grep -q "$file"; then
-                   MODIFIED_IMPLEMENTATIONS=$((MODIFIED_IMPLEMENTATIONS + 1))
-                 fi
-                 IMPLEMENTED=$((IMPLEMENTED + 1))
-               else
-                 STUB_ONLY=$((STUB_ONLY + 1))
-               fi
+                if echo "$ADDED_FILES" | grep -q "$file"; then
+                  NEWLY_IMPLEMENTED=$((NEWLY_IMPLEMENTED + 1))
+                elif echo "$MODIFIED_FILES" | grep -q "$file"; then
+                  MODIFIED_IMPLEMENTATIONS=$((MODIFIED_IMPLEMENTATIONS + 1))
+                fi
+                IMPLEMENTED=$((IMPLEMENTED + 1))
+              else
+                STUB_ONLY=$((STUB_ONLY + 1))
+              fi
             fi
           done
           
-                     # Deleted files
-           for file in $DELETED_FILES; do
-             DELETED_IMPLEMENTATIONS=$((DELETED_IMPLEMENTATIONS + 1))
-           done
+          # Deleted files
+          for file in $DELETED_FILES; do
+            DELETED_IMPLEMENTATIONS=$((DELETED_IMPLEMENTATIONS + 1))
+          done
           
           # Check overall implementation status (including unchanged files)
           TOTAL_IMPLEMENTED=0
