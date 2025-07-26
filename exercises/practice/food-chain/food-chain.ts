@@ -25,15 +25,14 @@ She's dead, of course!
     result += `${animal.comment}\n`
   }
   
-  // Build the chain of swallowing
-  for (let i = verseNumber - 1; i >= 1; i--) {
-    const currentAnimal = animals[i - 1]
-    
-    if (i === 1) {
+  // Build the chain of swallowing (from current animal down to fly)
+  for (let i = verseNumber - 1; i >= 0; i--) {
+    if (i === 0) {
       // This is the fly, no more swallowing
       break
     }
     
+    const currentAnimal = animals[i - 1]
     const nextAnimal = animals[i - 2]
     
     if (i === 2) {
