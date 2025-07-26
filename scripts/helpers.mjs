@@ -384,7 +384,9 @@ export function prepare(assignment) {
     const exampleFile = path.join('exercises', assignment, exampleFileName)
     const exampleFileDestination = path.join('tmp_exercises', files.solution[i])
 
-    shell.sed("from '../", "from './", exampleFile).to(exampleFileDestination)
+    if (shell.test('-f', exampleFile)) {
+      shell.sed("from '../", "from './", exampleFile).to(exampleFileDestination)
+    }
   })
 
   if (files.solution.length > exampleFiles.length) {
