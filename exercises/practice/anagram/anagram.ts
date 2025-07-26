@@ -1,9 +1,23 @@
 export class Anagram {
-  constructor(input: unknown) {
-    throw new Error('Remove this line and implement the function')
+  private readonly subject: string
+
+  constructor(input: string) {
+    this.subject = input
   }
 
-  public matches(...potentials: unknown[]): unknown {
-    throw new Error('Remove this line and implement the function')
+  private normalize(word: string): string {
+    return [...word.toLowerCase()].sort().join('')
+  }
+
+  public matches(...potentials: string[]): string[] {
+    const normalizedSubject = this.normalize(this.subject)
+    const subjectLower = this.subject.toLowerCase()
+    return potentials.filter((candidate) => {
+      const candidateLower = candidate.toLowerCase()
+      if (candidateLower === subjectLower) {
+        return false
+      }
+      return this.normalize(candidate) === normalizedSubject
+    })
   }
 }
