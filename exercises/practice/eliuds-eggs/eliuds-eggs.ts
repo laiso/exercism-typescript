@@ -3,6 +3,6 @@
 // convenience to get you started writing code faster.
 //
 
-export const eggCount = (displayValue: unknown): unknown => {
-  throw new Error('Remove this line and implement the function')
+export const eggCount = (displayValue: number): number => {
+  return displayValue.toString(2).split('1').length - 1
 }

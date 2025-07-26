@@ -1,5 +1,12 @@
 export class Gigasecond {
-  public date(/* Parameters go here */) {
-    throw new Error('Remove this line and implement the function')
+  private birthDate: Date
+
+  constructor(birthDate: Date) {
+    this.birthDate = birthDate
+  }
+
+  public date(): Date {
+    const gigasecond = 1000000000 * 1000 // 1 billion seconds in milliseconds
+    return new Date(this.birthDate.getTime() + gigasecond)
   }
 }

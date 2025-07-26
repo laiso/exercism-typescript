@@ -1,13 +1,32 @@
 export class GradeSchool {
-  roster() {
-    throw new Error('Remove this line and implement the function')
+  private students: { [grade: number]: string[] } = {}
+
+  roster(): { [grade: number]: string[] } {
+    const result: { [grade: number]: string[] } = {}
+    const grades = Object.keys(this.students).map(Number).sort((a, b) => a - b)
+    
+    for (const grade of grades) {
+      result[grade] = [...this.students[grade]].sort()
+    }
+    
+    return result
   }
 
-  add() {
-    throw new Error('Remove this line and implement the function')
+  add(student: string, grade: number): void {
+    for (const existingGrade in this.students) {
+      const index = this.students[existingGrade].indexOf(student)
+      if (index !== -1) {
+        this.students[existingGrade].splice(index, 1)
+      }
+    }
+    
+    if (!this.students[grade]) {
+      this.students[grade] = []
+    }
+    this.students[grade].push(student)
   }
 
-  grade() {
-    throw new Error('Remove this line and implement the function')
+  grade(grade: number): string[] {
+    return this.students[grade] ? [...this.students[grade]].sort() : []
   }
 }

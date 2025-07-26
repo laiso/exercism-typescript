@@ -1,25 +1,47 @@
 export class BinarySearchTree {
-  constructor(data: unknown) {
-    throw new Error('Remove this line and implement the function')
+  private _data: number
+  private _left?: BinarySearchTree
+  private _right?: BinarySearchTree
+
+  constructor(data: number) {
+    this._data = data
   }
 
-  public get data(): unknown {
-    throw new Error('Remove this line and implement the function')
+  public get data(): number {
+    return this._data
   }
 
   public get right(): BinarySearchTree | undefined {
-    throw new Error('Remove this line and implement the function')
+    return this._right
   }
 
   public get left(): BinarySearchTree | undefined {
-    throw new Error('Remove this line and implement the function')
+    return this._left
   }
 
-  public insert(item: unknown): unknown {
-    throw new Error('Remove this line and implement the function')
+  public insert(item: number): void {
+    if (item <= this._data) {
+      if (this._left) {
+        this._left.insert(item)
+      } else {
+        this._left = new BinarySearchTree(item)
+      }
+    } else {
+      if (this._right) {
+        this._right.insert(item)
+      } else {
+        this._right = new BinarySearchTree(item)
+      }
+    }
   }
 
-  public each(callback: (data: unknown) => unknown): unknown {
-    throw new Error('Remove this line and implement the function')
+  public each(callback: (data: number) => void): void {
+    if (this._left) {
+      this._left.each(callback)
+    }
+    callback(this._data)
+    if (this._right) {
+      this._right.each(callback)
+    }
   }
 }

@@ -1,7 +1,19 @@
-export function keep<T>() {
-  throw new Error('Remove this line and implement the function')
+export function keep<T>(collection: T[], predicate: (item: T) => boolean): T[] {
+  const result: T[] = []
+  for (const item of collection) {
+    if (predicate(item)) {
+      result.push(item)
+    }
+  }
+  return result
 }
 
-export function discard<T>() {
-  throw new Error('Remove this line and implement the function')
+export function discard<T>(collection: T[], predicate: (item: T) => boolean): T[] {
+  const result: T[] = []
+  for (const item of collection) {
+    if (!predicate(item)) {
+      result.push(item)
+    }
+  }
+  return result
 }

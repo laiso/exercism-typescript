@@ -1,37 +1,67 @@
 export class Rational {
-  constructor() {
-    throw new Error('Remove this line and implement the function')
+  public numerator: number
+  public denominator: number
+
+  constructor(numerator: number, denominator: number) {
+    if (denominator === 0) {
+      throw new Error('Denominator cannot be zero')
+    }
+    
+    const gcd = this.gcd(Math.abs(numerator), Math.abs(denominator))
+    this.numerator = numerator / gcd
+    this.denominator = denominator / gcd
+    
+    if (this.denominator < 0) {
+      this.numerator = -this.numerator
+      this.denominator = -this.denominator
+    }
   }
 
-  add() {
-    throw new Error('Remove this line and implement the function')
+  private gcd(a: number, b: number): number {
+    return b === 0 ? a : this.gcd(b, a % b)
   }
 
-  sub() {
-    throw new Error('Remove this line and implement the function')
+  add(other: Rational): Rational {
+    const num = this.numerator * other.denominator + other.numerator * this.denominator
+    const den = this.denominator * other.denominator
+    return new Rational(num, den)
   }
 
-  mul() {
-    throw new Error('Remove this line and implement the function')
+  sub(other: Rational): Rational {
+    const num = this.numerator * other.denominator - other.numerator * this.denominator
+    const den = this.denominator * other.denominator
+    return new Rational(num, den)
   }
 
-  div() {
-    throw new Error('Remove this line and implement the function')
+  mul(other: Rational): Rational {
+    const num = this.numerator * other.numerator
+    const den = this.denominator * other.denominator
+    return new Rational(num, den)
   }
 
-  abs() {
-    throw new Error('Remove this line and implement the function')
+  div(other: Rational): Rational {
+    const num = this.numerator * other.denominator
+    const den = this.denominator * other.numerator
+    return new Rational(num, den)
   }
 
-  exprational() {
-    throw new Error('Remove this line and implement the function')
+  abs(): Rational {
+    return new Rational(Math.abs(this.numerator), this.denominator)
   }
 
-  expreal() {
-    throw new Error('Remove this line and implement the function')
+  exprational(exponent: number): Rational {
+    if (exponent >= 0) {
+      return new Rational(Math.pow(this.numerator, exponent), Math.pow(this.denominator, exponent))
+    } else {
+      return new Rational(Math.pow(this.denominator, -exponent), Math.pow(this.numerator, -exponent))
+    }
   }
 
-  reduce() {
-    throw new Error('Remove this line and implement the function')
+  expreal(base: number): number {
+    return Math.pow(base, this.numerator / this.denominator)
+  }
+
+  reduce(): Rational {
+    return new Rational(this.numerator, this.denominator)
   }
 }

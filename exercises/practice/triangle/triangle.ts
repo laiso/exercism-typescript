@@ -1,17 +1,35 @@
 export class Triangle {
-  constructor(...sides) {
-    throw new Error('Remove this line and implement the function')
+  private sides: number[]
+
+  constructor(...sides: number[]) {
+    this.sides = sides.sort((a, b) => a - b)
+    
+    if (sides.length !== 3) {
+      throw new Error('Triangle must have exactly 3 sides')
+    }
+    
+    if (sides.some(side => side <= 0)) {
+      throw new Error('All sides must be positive')
+    }
+    
+    if (this.sides[0] + this.sides[1] <= this.sides[2]) {
+      throw new Error('Triangle inequality violation')
+    }
   }
 
-  get isEquilateral() {
-    throw new Error('Remove this line and implement the function')
+  get isEquilateral(): boolean {
+    return this.sides[0] === this.sides[1] && this.sides[1] === this.sides[2]
   }
 
-  get isIsosceles() {
-    throw new Error('Remove this line and implement the function')
+  get isIsosceles(): boolean {
+    return this.sides[0] === this.sides[1] || 
+           this.sides[1] === this.sides[2] || 
+           this.sides[0] === this.sides[2]
   }
 
-  get isScalene() {
-    throw new Error('Remove this line and implement the function')
+  get isScalene(): boolean {
+    return this.sides[0] !== this.sides[1] && 
+           this.sides[1] !== this.sides[2] && 
+           this.sides[0] !== this.sides[2]
   }
 }

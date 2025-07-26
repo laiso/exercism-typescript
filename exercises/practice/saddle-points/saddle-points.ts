@@ -1,3 +1,21 @@
-export function saddlePoints(/* Parameters go here */) {
-  throw new Error('Remove this line and implement the function')
+export function saddlePoints(matrix: number[][]): { row: number; column: number }[] {
+  if (matrix.length === 0) return []
+  
+  const result: { row: number; column: number }[] = []
+  
+  for (let row = 0; row < matrix.length; row++) {
+    for (let col = 0; col < matrix[row].length; col++) {
+      const value = matrix[row][col]
+      
+      const isMaxInRow = matrix[row].every(val => val <= value)
+      
+      const isMinInCol = matrix.every(r => r[col] >= value)
+      
+      if (isMaxInRow && isMinInCol) {
+        result.push({ row: row + 1, column: col + 1 })
+      }
+    }
+  }
+  
+  return result
 }
