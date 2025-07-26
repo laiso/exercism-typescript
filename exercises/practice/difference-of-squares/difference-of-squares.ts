@@ -1,17 +1,20 @@
 export class Squares {
-  constructor(count: unknown) {
-    throw new Error('Remove this line and implement the function')
+  private readonly count: number
+
+  constructor(count: number) {
+    this.count = count
   }
 
-  get sumOfSquares(): unknown {
-    throw new Error('Remove this line and implement the function')
+  get sumOfSquares(): number {
+    return (this.count * (this.count + 1) * (2 * this.count + 1)) / 6
   }
 
-  get squareOfSum(): unknown {
-    throw new Error('Remove this line and implement the function')
+  get squareOfSum(): number {
+    const sum = (this.count * (this.count + 1)) / 2
+    return sum * sum
   }
 
-  get difference(): unknown {
-    throw new Error('Remove this line and implement the function')
+  get difference(): number {
+    return this.squareOfSum - this.sumOfSquares
   }
 }

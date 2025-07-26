@@ -4,21 +4,45 @@ type Positions = {
   white: Position
   black: Position
 }
+
 export class QueenAttack {
   public readonly black: Position
   public readonly white: Position
 
-  // white: [whiteRow, whiteColumn]
-  // black: [blackRow, blackColumn]
-  constructor({}: Partial<Positions> = {}) {
-    throw new Error('Remove this line and implement the function')
+  constructor({
+    black = [0, 3],
+    white = [7, 3],
+  }: Partial<Positions> = {}) {
+    if (this.isInvalid(white) || this.isInvalid(black)) {
+      throw new Error('Queen must be placed on the board')
+    }
+    if (white[0] === black[0] && white[1] === black[1]) {
+      throw new Error('Queens cannot share the same space')
+    }
+    this.white = white
+    this.black = black
   }
 
-  toString() {
-    throw new Error('Remove this line and implement the function')
+  private isInvalid(position: Position): boolean {
+    const [row, col] = position
+    return row < 0 || row > 7 || col < 0 || col > 7
   }
 
-  get canAttack() {
-    throw new Error('Remove this line and implement the function')
+  toString(): string {
+    const board = Array.from({ length: 8 }, () => Array(8).fill('_'))
+    board[this.white[0]][this.white[1]] = 'W'
+    board[this.black[0]][this.black[1]] = 'B'
+    return board.map((row) => row.join(' ')).join('\n')
+  }
+
+  get canAttack(): boolean {
+    const [whiteRow, whiteCol] = this.white
+    const [blackRow, blackCol] = this.black
+
+    if (whiteRow === blackRow || whiteCol === blackCol) {
+      return true
+    }
+
+    return Math.abs(whiteRow - blackRow) === Math.abs(whiteCol - blackCol)
   }
 }

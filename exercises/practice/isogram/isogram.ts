@@ -1,3 +1,4 @@
-export function isIsogram(/* parameters go here */): unknown {
-  throw new Error('Remove this line and implement the function')
+export function isIsogram(phrase: string): boolean {
+  const cleaned = phrase.toLowerCase().replace(/[\s-]/g, '')
+  return new Set(cleaned).size === cleaned.length
 }
