@@ -25,22 +25,24 @@ She's dead, of course!
     result += `${animal.comment}\n`
   }
   
-  // Build the chain of swallowing (from current animal down to fly)
-  for (let i = verseNumber - 1; i >= 0; i--) {
-    if (i === 0) {
-      // This is the fly, no more swallowing
-      break
-    }
-    
+  // Build the chain of swallowing (from current animal down to spider)
+  for (let i = verseNumber - 1; i > 1; i--) {
     const currentAnimal = animals[i - 1]
     const nextAnimal = animals[i - 2]
     
-    if (i === 2) {
-      // Special case for spider being caught by bird
-      result += `She swallowed the ${currentAnimal.name} to catch the ${nextAnimal.name} ${currentAnimal.special}.\n`
+    if (nextAnimal.name === 'spider') {
+      // Special case: when catching the spider, include the special text
+      result += `She swallowed the ${currentAnimal.name} to catch the ${nextAnimal.name} ${nextAnimal.special}.\n`
     } else {
       result += `She swallowed the ${currentAnimal.name} to catch the ${nextAnimal.name}.\n`
     }
+  }
+  
+  // Add the final line about swallowing the spider to catch the fly (if applicable)
+  if (verseNumber > 1) {
+    const spider = animals[1]
+    const fly = animals[0]
+    result += `She swallowed the ${spider.name} to catch the ${fly.name}.\n`
   }
   
   result += `I don't know why she swallowed the fly. Perhaps she'll die.\n`
