@@ -1,7 +1,10 @@
 name: Progress Check
 
-on: pull_request
-
+on:
+  push:
+    branches: 
+      - "**"
+  
 jobs:
   progress-check:
     runs-on: ubuntu-22.04
@@ -9,6 +12,13 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871
+        with:
+          fetch-depth: 0  # Needed for comparison with patch branch
+          
+      - name: Fetch base branch for comparison
+        run: |
+          echo "Fetching patch branch for comparison..."
+          git fetch origin patch:patch || echo "patch branch not found"
 
       - name: Enable corepack
         run: corepack enable yarn
@@ -22,211 +32,235 @@ jobs:
       - name: Install dependencies
         run: corepack yarn install --immutable
 
-      - name: Count total exercises
-        id: total-count
+      - name: Get changed files and analyze implementation
+        id: git-analysis
         run: |
-          TOTAL=$(find exercises/practice exercises/concept -maxdepth 1 -type d -name "*" | grep -v "^exercises/practice$" | grep -v "^exercises/concept$" | wc -l)
-          echo "total=$TOTAL" >> $GITHUB_OUTPUT
-          echo "Total exercises: $TOTAL"
-
-      - name: Analyze exercise status
-        id: exercise-analysis
-        run: |
-          IMPLEMENTED=0
-          TESTED=0
-          PASSED=0
-          FAILED=0
-          SKIPPED=0
-          DETAILED_RESULTS=""
+          echo "📊 Analyzing implementation based on Git changes..."
+          
+          # Compare with base branch
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            BASE_REF="origin/${{ github.base_ref }}"
+            echo "Comparing with PR base: $BASE_REF"
+          else
+            # For push, compare with patch branch
+            if git rev-parse --verify patch >/dev/null 2>&1; then
+              BASE_REF="patch"
+              echo "Comparing with patch branch: $BASE_REF"
+            else
+              BASE_REF="HEAD~1" 
+              echo "patch branch not found, comparing with previous commit: $BASE_REF"
+            fi
+          fi
+          
+          # Get list of changed files
+          CHANGED_FILES=$(git diff --name-only $BASE_REF HEAD | grep -E "exercises/.+\.ts$" | grep -v "\.test\.ts$" || true)
+          DELETED_FILES=$(git diff --diff-filter=D --name-only $BASE_REF HEAD | grep -E "exercises/.+\.ts$" | grep -v "\.test\.ts$" || true)
+          ADDED_FILES=$(git diff --diff-filter=A --name-only $BASE_REF HEAD | grep -E "exercises/.+\.ts$" | grep -v "\.test\.ts$" || true)
+          MODIFIED_FILES=$(git diff --diff-filter=M --name-only $BASE_REF HEAD | grep -E "exercises/.+\.ts$" | grep -v "\.test\.ts$" || true)
+          
+                     echo "Changed solution files: $(echo "$CHANGED_FILES" | wc -l) files"
           
           # Get all exercise directories
-          EXERCISES=$(find exercises/practice exercises/concept -maxdepth 1 -type d -name "*" | grep -v "^exercises/practice$" | grep -v "^exercises/concept$")
+          ALL_EXERCISES=$(find exercises/practice exercises/concept -maxdepth 1 -type d -name "*" | grep -v "^exercises/practice$" | grep -v "^exercises/concept$")
+          TOTAL_EXERCISES=$(echo "$ALL_EXERCISES" | wc -l)
           
-          for exercise in $EXERCISES; do
-            exercise_name=$(basename "$exercise")
-            test_file="$exercise/${exercise_name}.test.ts"
-            solution_file="$exercise/${exercise_name}.ts"
-            proof_file="$exercise/.meta/proof.ci.ts"
-            
-            echo "Analyzing $exercise_name..."
-            
-            # Check implementation status
-            if [ -f "$solution_file" ]; then
-              IMPLEMENTED=$((IMPLEMENTED + 1))
-              DETAILED_RESULTS="$DETAILED_RESULTS\n- $exercise_name: ✅ Implemented"
+          # Stats variables
+          IMPLEMENTED=0
+          NEWLY_IMPLEMENTED=0
+          MODIFIED_IMPLEMENTATIONS=0
+          DELETED_IMPLEMENTATIONS=0
+          STUB_ONLY=0
+          
+          # Analyze changed files
+                     for file in $CHANGED_FILES; do
+             if [ -f "$file" ]; then
+               # Check file contents
+               line_count=$(wc -l < "$file" 2>/dev/null || echo "0")
+               has_logic=$(grep -cE "(if|for|while|function|class|=|return)" "$file" 2>/dev/null || echo "0")
               
-              # Check if testable
-              if [ -f "$test_file" ]; then
-                TESTED=$((TESTED + 1))
-                DETAILED_RESULTS="$DETAILED_RESULTS (testable)"
-                
-                # Try to run test
-                echo "Testing $exercise_name..."
-                mkdir -p tmp_test
-                cp "$test_file" tmp_test/
-                cp "$solution_file" tmp_test/
-                cp "$exercise"/package.json tmp_test/ 2>/dev/null || true
-                cp "$exercise"/tsconfig.json tmp_test/ 2>/dev/null || true
-                cp "$exercise"/jest.config.cjs tmp_test/ 2>/dev/null || true
-                cp "$exercise"/babel.config.cjs tmp_test/ 2>/dev/null || true
-                
-                cd tmp_test
-                if yarn test >/dev/null 2>&1; then
-                  PASSED=$((PASSED + 1))
-                  DETAILED_RESULTS="$DETAILED_RESULTS ✅ PASSED"
-                else
-                  FAILED=$((FAILED + 1))
-                  DETAILED_RESULTS="$DETAILED_RESULTS ❌ FAILED"
-                fi
-                cd ..
-                rm -rf tmp_test
-              else
-                SKIPPED=$((SKIPPED + 1))
-                DETAILED_RESULTS="$DETAILED_RESULTS ⏭️ No test file"
-              fi
-            else
-              SKIPPED=$((SKIPPED + 1))
-              DETAILED_RESULTS="$DETAILED_RESULTS\n- $exercise_name: ❌ Not implemented"
+              if [ "$line_count" -gt 5 ] && [ "$has_logic" -gt 2 ]; then
+                                 if echo "$ADDED_FILES" | grep -q "$file"; then
+                   NEWLY_IMPLEMENTED=$((NEWLY_IMPLEMENTED + 1))
+                 elif echo "$MODIFIED_FILES" | grep -q "$file"; then
+                   MODIFIED_IMPLEMENTATIONS=$((MODIFIED_IMPLEMENTATIONS + 1))
+                 fi
+                 IMPLEMENTED=$((IMPLEMENTED + 1))
+               else
+                 STUB_ONLY=$((STUB_ONLY + 1))
+               fi
             fi
           done
           
-          echo "implemented=$IMPLEMENTED" >> $GITHUB_OUTPUT
-          echo "tested=$TESTED" >> $GITHUB_OUTPUT
-          echo "passed=$PASSED" >> $GITHUB_OUTPUT
-          echo "failed=$FAILED" >> $GITHUB_OUTPUT
-          echo "skipped=$SKIPPED" >> $GITHUB_OUTPUT
-          echo "detailed_results<<EOF" >> $GITHUB_OUTPUT
-          echo -e "$DETAILED_RESULTS" >> $GITHUB_OUTPUT
+                     # Deleted files
+           for file in $DELETED_FILES; do
+             DELETED_IMPLEMENTATIONS=$((DELETED_IMPLEMENTATIONS + 1))
+           done
+          
+          # Check overall implementation status (including unchanged files)
+          TOTAL_IMPLEMENTED=0
+          TOTAL_STUB_ONLY=0
+          
+          for exercise in $ALL_EXERCISES; do
+            exercise_name=$(basename "$exercise")
+            solution_file="$exercise/${exercise_name}.ts"
+            
+            if [ -f "$solution_file" ]; then
+              line_count=$(wc -l < "$solution_file" 2>/dev/null || echo "0")
+              has_logic=$(grep -cE "(if|for|while|function|class|=|return)" "$solution_file" 2>/dev/null || echo "0")
+              
+              if [ "$line_count" -gt 5 ] && [ "$has_logic" -gt 2 ]; then
+                TOTAL_IMPLEMENTED=$((TOTAL_IMPLEMENTED + 1))
+              else
+                TOTAL_STUB_ONLY=$((TOTAL_STUB_ONLY + 1))
+              fi
+            fi
+          done
+          
+          # Number of changed files
+          CHANGED_COUNT=$(echo "$CHANGED_FILES" | grep -c . || echo "0")
+          
+          # Output
+          echo "total_exercises=$TOTAL_EXERCISES" >> $GITHUB_OUTPUT
+          echo "changed_files_count=$CHANGED_COUNT" >> $GITHUB_OUTPUT
+          echo "newly_implemented=$NEWLY_IMPLEMENTED" >> $GITHUB_OUTPUT
+          echo "modified_implementations=$MODIFIED_IMPLEMENTATIONS" >> $GITHUB_OUTPUT
+          echo "deleted_implementations=$DELETED_IMPLEMENTATIONS" >> $GITHUB_OUTPUT
+          echo "total_implemented=$TOTAL_IMPLEMENTED" >> $GITHUB_OUTPUT
+          echo "total_stub_only=$TOTAL_STUB_ONLY" >> $GITHUB_OUTPUT
+          echo "changed_files<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGED_FILES" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
           
-          echo "Implemented: $IMPLEMENTED"
-          echo "Tested: $TESTED"
-          echo "Passed: $PASSED"
-          echo "Failed: $FAILED"
-          echo "Skipped: $SKIPPED"
+          echo "📊 Git-based Analysis Summary:"
+          echo "  Total exercises: $TOTAL_EXERCISES"
+          echo "  Changed files: $CHANGED_COUNT"
+          echo "  Newly implemented: $NEWLY_IMPLEMENTED"
+          echo "  Modified implementations: $MODIFIED_IMPLEMENTATIONS"
+          echo "  Deleted implementations: $DELETED_IMPLEMENTATIONS"
+          echo "  Total implemented: $TOTAL_IMPLEMENTED"
+          echo "  Total stub only: $TOTAL_STUB_ONLY"
+
+      - name: Test all implemented exercises
+        id: test-all
+        run: |
+          TOTAL_PASSED=0
+          TOTAL_FAILED=0
+          TOTAL_TESTED=0
+          
+          echo "🧪 Testing all implemented exercises..."
+          
+          # Get all exercise directories
+          ALL_EXERCISES=$(find exercises/practice exercises/concept -maxdepth 1 -type d -name "*" | grep -v "^exercises/practice$" | grep -v "^exercises/concept$")
+          
+          for exercise in $ALL_EXERCISES; do
+            exercise_name=$(basename "$exercise")
+            test_file="$exercise/${exercise_name}.test.ts"
+            solution_file="$exercise/${exercise_name}.ts"
+            
+            # Only test if both files exist and solution is implemented
+            if [ -f "$test_file" ] && [ -f "$solution_file" ]; then
+              line_count=$(wc -l < "$solution_file" 2>/dev/null || echo "0")
+              has_logic=$(grep -cE "(if|for|while|function|class|=|return)" "$solution_file" 2>/dev/null || echo "0")
+              
+              # Only test if it's actually implemented (not just a stub)
+              if [ "$line_count" -gt 5 ] && [ "$has_logic" -gt 2 ]; then
+                TOTAL_TESTED=$((TOTAL_TESTED + 1))
+                
+                mkdir -p tmp_test
+                
+                # Copy all necessary files
+                cp "$test_file" tmp_test/
+                cp "$solution_file" tmp_test/
+                cp "$exercise"/package.json tmp_test/ 2>/dev/null || cp common/package.json tmp_test/
+                cp "$exercise"/yarn.lock tmp_test/ 2>/dev/null || true
+                cp "$exercise"/.yarnrc.yml tmp_test/ 2>/dev/null || cp .yarnrc.yml tmp_test/ 2>/dev/null || true
+                cp "$exercise"/tsconfig.json tmp_test/ 2>/dev/null || cp common/tsconfig.json tmp_test/
+                cp "$exercise"/jest.config.cjs tmp_test/ 2>/dev/null || cp common/jest.config.cjs tmp_test/
+                cp "$exercise"/babel.config.cjs tmp_test/ 2>/dev/null || cp common/babel.config.cjs tmp_test/
+                cp "$exercise"/test-runner.mjs tmp_test/ 2>/dev/null || true
+                
+                cd tmp_test
+                if yarn install --no-immutable >/dev/null 2>&1; then
+                  if timeout 30 yarn jest --passWithNoTests >/dev/null 2>&1; then
+                    TOTAL_PASSED=$((TOTAL_PASSED + 1))
+                    echo "✅ $exercise_name"
+                  else
+                    if timeout 30 yarn test >/dev/null 2>&1; then
+                      TOTAL_PASSED=$((TOTAL_PASSED + 1))
+                      echo "✅ $exercise_name"
+                    else
+                      TOTAL_FAILED=$((TOTAL_FAILED + 1))
+                      echo "❌ $exercise_name"
+                    fi
+                  fi
+                else
+                  TOTAL_FAILED=$((TOTAL_FAILED + 1))
+                  echo "❌ $exercise_name (deps failed)"
+                fi
+                cd ..
+                rm -rf tmp_test
+              fi
+            fi
+          done
+          
+          echo "total_tested=$TOTAL_TESTED" >> $GITHUB_OUTPUT
+          echo "total_passed=$TOTAL_PASSED" >> $GITHUB_OUTPUT
+          echo "total_failed=$TOTAL_FAILED" >> $GITHUB_OUTPUT
 
       - name: Calculate progress metrics
         id: progress-metrics
         run: |
-          TOTAL=${{ steps.total-count.outputs.total }}
-          IMPLEMENTED=${{ steps.exercise-analysis.outputs.implemented }}
-          TESTED=${{ steps.exercise-analysis.outputs.tested }}
-          PASSED=${{ steps.exercise-analysis.outputs.passed }}
+          TOTAL=${{ steps.git-analysis.outputs.total_exercises }}
+          TOTAL_IMPLEMENTED=${{ steps.git-analysis.outputs.total_implemented }}
+          TOTAL_PASSED=${{ steps.test-all.outputs.total_passed }}
           
-          # Implementation progress
+          # Implementation rate
           if [ "$TOTAL" -gt 0 ]; then
-            IMPLEMENTATION_RATE=$((IMPLEMENTED * 100 / TOTAL))
+            IMPLEMENTATION_RATE=$((TOTAL_IMPLEMENTED * 100 / TOTAL))
           else
             IMPLEMENTATION_RATE=0
           fi
           
-          # Test success rate
-          if [ "$TESTED" -gt 0 ]; then
-            SUCCESS_RATE=$((PASSED * 100 / TESTED))
-          else
-            SUCCESS_RATE=0
-          fi
-          
-          # Overall completion rate
+          # Overall pass rate
           if [ "$TOTAL" -gt 0 ]; then
-            COMPLETION_RATE=$((PASSED * 100 / TOTAL))
+            PASS_RATE=$((TOTAL_PASSED * 100 / TOTAL))
           else
-            COMPLETION_RATE=0
+            PASS_RATE=0
           fi
           
           echo "implementation_rate=$IMPLEMENTATION_RATE" >> $GITHUB_OUTPUT
-          echo "success_rate=$SUCCESS_RATE" >> $GITHUB_OUTPUT
-          echo "completion_rate=$COMPLETION_RATE" >> $GITHUB_OUTPUT
+          echo "pass_rate=$PASS_RATE" >> $GITHUB_OUTPUT
           
-          echo "Implementation Rate: $IMPLEMENTATION_RATE%"
-          echo "Success Rate: $SUCCESS_RATE%"
-          echo "Completion Rate: $COMPLETION_RATE%"
+          echo "📈 Progress Summary:"
+          echo "  📚 Total Exercises: $TOTAL"
+          echo "  ✅ Implemented: $TOTAL_IMPLEMENTED ($IMPLEMENTATION_RATE%)"
+          echo "  🎯 Passed Tests: $TOTAL_PASSED ($PASS_RATE%)"
 
-      - name: Create detailed progress report
+      - name: Create progress report
         run: |
-          TOTAL=${{ steps.total-count.outputs.total }}
-          IMPLEMENTED=${{ steps.exercise-analysis.outputs.implemented }}
-          TESTED=${{ steps.exercise-analysis.outputs.tested }}
-          PASSED=${{ steps.exercise-analysis.outputs.passed }}
-          FAILED=${{ steps.exercise-analysis.outputs.failed }}
-          SKIPPED=${{ steps.exercise-analysis.outputs.skipped }}
+          TOTAL=${{ steps.git-analysis.outputs.total_exercises }}
+          TOTAL_IMPLEMENTED=${{ steps.git-analysis.outputs.total_implemented }}
+          TOTAL_PASSED=${{ steps.test-all.outputs.total_passed }}
+          TOTAL_FAILED=${{ steps.test-all.outputs.total_failed }}
           IMPLEMENTATION_RATE=${{ steps.progress-metrics.outputs.implementation_rate }}
-          SUCCESS_RATE=${{ steps.progress-metrics.outputs.success_rate }}
-          COMPLETION_RATE=${{ steps.progress-metrics.outputs.completion_rate }}
-          DETAILED_RESULTS="${{ steps.exercise-analysis.outputs.detailed_results }}"
+          PASS_RATE=${{ steps.progress-metrics.outputs.pass_rate }}
           
-          echo "# Detailed Progress Report" > progress-report.md
+          echo "# Exercism TypeScript Progress Report" > progress-report.md
           echo "" >> progress-report.md
-          echo "## Summary Statistics" >> progress-report.md
+          echo "## 📊 Summary" >> progress-report.md
           echo "- **Total Exercises**: $TOTAL" >> progress-report.md
-          echo "- **Implemented**: $IMPLEMENTED ($IMPLEMENTATION_RATE%)" >> progress-report.md
-          echo "- **Tested**: $TESTED" >> progress-report.md
-          echo "- **Passed**: $PASSED ($SUCCESS_RATE% of tested)" >> progress-report.md
-          echo "- **Failed**: $FAILED" >> progress-report.md
-          echo "- **Skipped**: $SKIPPED" >> progress-report.md
-          echo "- **Overall Completion**: $COMPLETION_RATE%" >> progress-report.md
+          echo "- **Implemented**: $TOTAL_IMPLEMENTED ($IMPLEMENTATION_RATE%)" >> progress-report.md
+          echo "- **Tests Passed**: $TOTAL_PASSED ($PASS_RATE%)" >> progress-report.md
+          echo "- **Tests Failed**: $TOTAL_FAILED" >> progress-report.md
           echo "" >> progress-report.md
-          echo "## Progress Bars" >> progress-report.md
-          echo "### Implementation Progress" >> progress-report.md
+          echo "## 📈 Progress Bar" >> progress-report.md
           echo "\`\`\`" >> progress-report.md
-          echo "$(printf '█%.0s' $(seq 1 $((IMPLEMENTATION_RATE/5))))$(printf '░%.0s' $(seq 1 $((20-IMPLEMENTATION_RATE/5)))) $IMPLEMENTATION_RATE%" >> progress-report.md
+          echo "Implementation: $(printf '█%.0s' $(seq 1 $((IMPLEMENTATION_RATE/5))))$(printf '░%.0s' $(seq 1 $((20-IMPLEMENTATION_RATE/5)))) $IMPLEMENTATION_RATE%" >> progress-report.md
+          echo "Pass Rate:     $(printf '█%.0s' $(seq 1 $((PASS_RATE/5))))$(printf '░%.0s' $(seq 1 $((20-PASS_RATE/5)))) $PASS_RATE%" >> progress-report.md
           echo "\`\`\`" >> progress-report.md
-          echo "" >> progress-report.md
-          echo "### Success Rate (of tested)" >> progress-report.md
-          echo "\`\`\`" >> progress-report.md
-          echo "$(printf '█%.0s' $(seq 1 $((SUCCESS_RATE/5))))$(printf '░%.0s' $(seq 1 $((20-SUCCESS_RATE/5)))) $SUCCESS_RATE%" >> progress-report.md
-          echo "\`\`\`" >> progress-report.md
-          echo "" >> progress-report.md
-          echo "### Overall Completion" >> progress-report.md
-          echo "\`\`\`" >> progress-report.md
-          echo "$(printf '█%.0s' $(seq 1 $((COMPLETION_RATE/5))))$(printf '░%.0s' $(seq 1 $((20-COMPLETION_RATE/5)))) $COMPLETION_RATE%" >> progress-report.md
-          echo "\`\`\`" >> progress-report.md
-          echo "" >> progress-report.md
-          echo "## Detailed Results" >> progress-report.md
-          echo "$DETAILED_RESULTS" >> progress-report.md
 
       - name: Upload progress report
         uses: actions/upload-artifact@v4
         with:
-          name: progress-report
-          path: progress-report.md
-
-      - name: Comment on PR
-        if: github.event_name == 'pull_request'
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const total = ${{ steps.total-count.outputs.total }};
-            const implemented = ${{ steps.exercise-analysis.outputs.implemented }};
-            const tested = ${{ steps.exercise-analysis.outputs.tested }};
-            const passed = ${{ steps.exercise-analysis.outputs.passed }};
-            const failed = ${{ steps.exercise-analysis.outputs.failed }};
-            const skipped = ${{ steps.exercise-analysis.outputs.skipped }};
-            const implementationRate = ${{ steps.progress-metrics.outputs.implementation_rate }};
-            const successRate = ${{ steps.progress-metrics.outputs.success_rate }};
-            const completionRate = ${{ steps.progress-metrics.outputs.completion_rate }};
-            
-            const message = `## 📊 Progress Check Results
-            
-            ### Summary
-            - **Total Exercises**: ${total}
-            - **Implemented**: ${implemented} (${implementationRate}%)
-            - **Tested**: ${tested}
-            - **Passed**: ${passed} (${successRate}% of tested)
-            - **Failed**: ${failed}
-            - **Skipped**: ${skipped}
-            - **Overall Completion**: ${completionRate}%
-            
-            ### Key Metrics
-            - 🎯 **Implementation Progress**: ${implementationRate}%
-            - ✅ **Success Rate**: ${successRate}%
-            - 🏆 **Overall Completion**: ${completionRate}%
-            
-            ${completionRate >= 80 ? '🎉 Excellent progress!' : completionRate >= 50 ? '👍 Good progress!' : '💪 Keep going!'}`;
-            
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: message
-            }); 
+          name: exercism-progress-report
+          path: progress-report.md 
