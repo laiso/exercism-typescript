@@ -1,13 +1,37 @@
 export class Allergies {
-  constructor(allergenIndex: unknown) {
-    throw new Error('Remove this line and implement the function')
+  private allergens = [
+    'eggs',
+    'peanuts',
+    'shellfish',
+    'strawberries',
+    'tomatoes',
+    'chocolate',
+    'pollen',
+    'cats'
+  ]
+  
+  private score: number
+
+  constructor(allergenIndex: number) {
+    this.score = allergenIndex % 256 // Only consider the first 8 bits
   }
 
-  public list(): unknown {
-    throw new Error('Remove this line and implement the function')
+  public list(): string[] {
+    const result: string[] = []
+    
+    for (let i = 0; i < this.allergens.length; i++) {
+      if (this.score & (1 << i)) {
+        result.push(this.allergens[i])
+      }
+    }
+    
+    return result
   }
 
-  public allergicTo(allergen: unknown): unknown {
-    throw new Error('Remove this line and implement the function')
+  public allergicTo(allergen: string): boolean {
+    const index = this.allergens.indexOf(allergen)
+    if (index === -1) return false
+    
+    return (this.score & (1 << index)) !== 0
   }
 }

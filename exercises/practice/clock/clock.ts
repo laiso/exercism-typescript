@@ -1,21 +1,30 @@
 export class Clock {
-  constructor(hour: unknown, minute?: unknown) {
-    throw new Error('Remove this line and implement the function')
+  private totalMinutes: number
+
+  constructor(hour: number, minute: number = 0) {
+    this.totalMinutes = this.normalize(hour * 60 + minute)
   }
 
-  public toString(): unknown {
-    throw new Error('Remove this line and implement the function')
+  private normalize(minutes: number): number {
+    const dayMinutes = 24 * 60
+    return ((minutes % dayMinutes) + dayMinutes) % dayMinutes
   }
 
-  public plus(minutes: unknown): Clock {
-    throw new Error('Remove this line and implement the function')
+  public toString(): string {
+    const hours = Math.floor(this.totalMinutes / 60)
+    const minutes = this.totalMinutes % 60
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`
   }
 
-  public minus(minutes: unknown): Clock {
-    throw new Error('Remove this line and implement the function')
+  public plus(minutes: number): Clock {
+    return new Clock(0, this.totalMinutes + minutes)
   }
 
-  public equals(other: unknown): unknown {
-    throw new Error('Remove this line and implement the function')
+  public minus(minutes: number): Clock {
+    return new Clock(0, this.totalMinutes - minutes)
+  }
+
+  public equals(other: Clock): boolean {
+    return this.totalMinutes === other.totalMinutes
   }
 }
