@@ -1,41 +1,82 @@
 export class CustomSet {
-  constructor(initial?: unknown) {
-    throw new Error('Remove this line and implement the function')
+  private elements: Set<unknown>
+
+  constructor(initial?: unknown[]) {
+    this.elements = new Set(initial || [])
   }
 
-  empty(): unknown {
-    throw new Error('Remove this line and implement the function')
+  empty(): boolean {
+    return this.elements.size === 0
   }
 
-  contains(element: unknown): unknown {
-    throw new Error('Remove this line and implement the function')
+  contains(element: unknown): boolean {
+    return this.elements.has(element)
   }
 
   add(element: unknown): CustomSet {
-    throw new Error('Remove this line and implement the function')
+    const newSet = new CustomSet()
+    newSet.elements = new Set(this.elements)
+    newSet.elements.add(element)
+    return newSet
   }
 
-  subset(other: unknown): CustomSet {
-    throw new Error('Remove this line and implement the function')
+  subset(other: CustomSet): boolean {
+    for (const element of this.elements) {
+      if (!other.contains(element)) {
+        return false
+      }
+    }
+    return true
   }
 
-  disjoint(other: unknown): CustomSet {
-    throw new Error('Remove this line and implement the function')
+  disjoint(other: CustomSet): boolean {
+    for (const element of this.elements) {
+      if (other.contains(element)) {
+        return false
+      }
+    }
+    return true
   }
 
-  eql(other: unknown): unknown {
-    throw new Error('Remove this line and implement the function')
+  eql(other: CustomSet): boolean {
+    if (this.elements.size !== other.elements.size) {
+      return false
+    }
+    
+    for (const element of this.elements) {
+      if (!other.contains(element)) {
+        return false
+      }
+    }
+    return true
   }
 
-  union(other: unknown): CustomSet {
-    throw new Error('Remove this line and implement the function')
+  union(other: CustomSet): CustomSet {
+    const newSet = new CustomSet()
+    newSet.elements = new Set(this.elements)
+    for (const element of other.elements) {
+      newSet.elements.add(element)
+    }
+    return newSet
   }
 
-  intersection(other: unknown): CustomSet {
-    throw new Error('Remove this line and implement the function')
+  intersection(other: CustomSet): CustomSet {
+    const newSet = new CustomSet()
+    for (const element of this.elements) {
+      if (other.contains(element)) {
+        newSet.elements.add(element)
+      }
+    }
+    return newSet
   }
 
-  difference(other: unknown): CustomSet {
-    throw new Error('Remove this line and implement the function')
+  difference(other: CustomSet): CustomSet {
+    const newSet = new CustomSet()
+    for (const element of this.elements) {
+      if (!other.contains(element)) {
+        newSet.elements.add(element)
+      }
+    }
+    return newSet
   }
 }

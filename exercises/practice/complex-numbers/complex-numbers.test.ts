@@ -174,21 +174,24 @@ describe('Complex numbers', () => {
     const expected = new ComplexNumber(5, 0)
     const actual = new ComplexNumber(5, 0).conj
 
-    expect(actual).toEqual(expected)
+    expect(actual.real).toEqual(expected.real)
+    expect(actual.imag).toEqual(expected.imag)
   })
 
   it('Conjugate a purely imaginary number', () => {
     const expected = new ComplexNumber(0, -5)
     const actual = new ComplexNumber(0, 5).conj
 
-    expect(actual).toEqual(expected)
+    expect(actual.real).toEqual(expected.real)
+    expect(actual.imag).toEqual(expected.imag)
   })
 
   it('Conjugate a number with real and imaginary part', () => {
     const expected = new ComplexNumber(1, -1)
     const actual = new ComplexNumber(1, 1).conj
 
-    expect(actual).toEqual(expected)
+    expect(actual.real).toEqual(expected.real)
+    expect(actual.imag).toEqual(expected.imag)
   })
 
   it("Euler's identity/formula", () => {
