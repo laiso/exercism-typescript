@@ -9,6 +9,7 @@ import { onLabeled } from "./process-label";
 import { ensureBaseAndHeadCommitsForPRAreAvailable } from "./prompt-template";
 import { performAdditionalValidation } from "./verify-inputs";
 import { onComment } from "./comment";
+import { runCodex } from "./run-codex";
 import { onReview } from "./review";
 
 async function main(): Promise<void> {
