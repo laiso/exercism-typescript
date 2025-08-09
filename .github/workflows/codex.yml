@@ -14,6 +14,10 @@ on:
         description: "workflow_dispatch 手動実行時に Codex に渡すプロンプト (/codex トリガー不要)"
         required: false
         default: ""
+      codex_home:
+        description: "CODEX_HOME に設定するパス (任意)"
+        required: false
+        default: ""
   issues:
     types: [opened, labeled]
   issue_comment:
@@ -74,7 +78,7 @@ jobs:
         with:
           openai_api_key: ${{ secrets.CODEX_OPENAI_API_KEY }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          codex_home: ./.github/codex/home
+          codex_home: ${{ github.event.inputs.codex_home || '.github/codex/home' }}
           codex_args: ${{ github.event.inputs.codex_args }}
           prompt: ${{ github.event.inputs.prompt }}
           trigger_phrase: "/codex"
