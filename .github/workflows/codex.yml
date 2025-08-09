@@ -1,6 +1,10 @@
 name: Codex
 
 on:
+  push:
+    branches:
+      - codex-action
+  workflow_dispatch:
   issues:
     types: [opened, labeled]
   issue_comment:
