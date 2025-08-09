@@ -66,4 +66,5 @@ jobs:
           openai_api_key: ${{ secrets.CODEX_OPENAI_API_KEY }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
           codex_home: ./.github/codex/home
+          codex_args: ${{ github.event.inputs.codex_args }}
           trigger_phrase: "/codex"
