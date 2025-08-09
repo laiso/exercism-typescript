@@ -5,6 +5,11 @@ on:
     branches:
       - codex-action
   workflow_dispatch:
+    inputs:
+      codex_args:
+        description: "Codex に渡す引数 (スペース区切り)"
+        required: false
+        default: "--config hide_agent_reasoning=true --full-auto"
   issues:
     types: [opened, labeled]
   issue_comment:
