@@ -23,6 +23,10 @@ inputs:
     description: "The release tag of the Codex model to run, e.g., 'rust-v0.3.0'. Defaults to the latest release."
     required: false
     default: ""
+  prompt:
+    description: "(workflow_dispatch 用) 直接 Codex に渡すプロンプト。comment/label イベントでは無視されます。"
+    required: false
+    default: ""
 
 runs:
   using: "composite"
@@ -115,6 +119,7 @@ runs:
         INPUT_CODEX_ARGS: ${{ inputs.codex_args || '' }}
         INPUT_CODEX_HOME: ${{ inputs.codex_home || ''}}
         INPUT_TRIGGER_PHRASE: ${{ inputs.trigger_phrase || '' }}
+  INPUT_PROMPT: ${{ inputs.prompt || '' }}
         OPENAI_API_KEY: ${{ inputs.openai_api_key }}
         GITHUB_TOKEN: ${{ inputs.github_token }}
         GITHUB_EVENT_ACTION: ${{ github.event.action || '' }}

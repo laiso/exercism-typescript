@@ -29,6 +29,20 @@ async function main(): Promise<void> {
   setGitHubActionsUser();
 
   switch (GITHUB_EVENT_NAME) {
+    case "workflow_dispatch": {
+      // 手動実行: 入力された prompt をそのまま Codex に渡す。
+      const manualPrompt = ctx.tryGetNonEmpty("INPUT_PROMPT");
+      if (!manualPrompt) {
+        console.warn(
+          "No INPUT_PROMPT provided for workflow_dispatch event: skipping Codex run.",
+        );
+        return;
+      }
+      const lastMessage = await runCodex(manualPrompt, ctx);
+      // 単純に標準出力へ結果を出す (コメント投稿対象が無いので)。
+      console.log("===== Codex Output (last message) =====\n" + lastMessage);
+      return;
+    }
     case "issues": {
       if (GITHUB_EVENT_ACTION === "labeled") {
         await onLabeled(config, ctx);
