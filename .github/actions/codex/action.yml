@@ -126,6 +126,36 @@ runs:
         # Display version (may fail if incompatible binary)
         /usr/local/bin/codex --version || { echo "Warning: failed to get Codex version" >&2; }
 
+    - name: Debug Codex binary and config
+      shell: bash
+      env:
+        INPUT_CODEX_HOME: ${{ inputs.codex_home || ''}}
+      run: |
+        set -euo pipefail
+        echo "GITHUB_WORKSPACE=${GITHUB_WORKSPACE}"
+        echo "---- Codex help/version ----"
+        /usr/local/bin/codex --help || true
+        /usr/local/bin/codex --version || true
+        /usr/local/bin/codex exec --help || true
+        echo "---- .github/codex tree ----"
+        ls -laR "${GITHUB_WORKSPACE}/.github/codex" || echo "No .github/codex directory"
+        echo "---- Resolve CODEX_HOME (if provided) ----"
+        if [[ -n "${INPUT_CODEX_HOME}" ]]; then
+          if [[ "${INPUT_CODEX_HOME}" = /* ]]; then
+            HOME_DIR="${INPUT_CODEX_HOME}"
+          else
+            # Trim leading ./ if present when constructing path
+            HOME_DIR="${GITHUB_WORKSPACE}/${INPUT_CODEX_HOME#./}"
+          fi
+          echo "INPUT_CODEX_HOME=${INPUT_CODEX_HOME}"
+          echo "Resolved CODEX_HOME=${HOME_DIR}"
+          ls -la "${HOME_DIR}" || echo "Resolved CODEX_HOME missing"
+          echo "---- CODEX_HOME contents ----"
+          ls -laR "${HOME_DIR}" || true
+        else
+          echo "INPUT_CODEX_HOME not provided"
+        fi
+
     - name: Install Bun
       uses: oven-sh/setup-bun@v2
       with:

@@ -2,7 +2,7 @@ import { fail } from "./fail";
 import { EnvContext } from "./env-context";
 import { tmpdir } from "os";
 import { join } from "node:path";
-import { readFile, mkdtemp, writeFile, access, stat } from "fs/promises";
+import { readFile, mkdtemp, writeFile, access, stat, readdir } from "fs/promises";
 import { constants as FS_CONSTANTS } from "fs";
 import { resolveWorkspacePath } from "./github-workspace";
 
@@ -40,7 +40,35 @@ export async function runCodex(
   const env: Record<string, string> = { ...process.env, OPENAI_API_KEY };
   const INPUT_CODEX_HOME = ctx.tryGet("INPUT_CODEX_HOME");
   if (INPUT_CODEX_HOME) {
-    env.CODEX_HOME = resolveWorkspacePath(INPUT_CODEX_HOME, ctx);
+    const resolved = resolveWorkspacePath(INPUT_CODEX_HOME, ctx);
+    try {
+      const st = await stat(resolved);
+      if (!st.isDirectory()) {
+        console.warn(
+          `Specified CODEX_HOME is not a directory: '${resolved}'. Running without CODEX_HOME.`,
+        );
+      } else {
+        try {
+          const entries = await readdir(resolved);
+          if (entries.length === 0) {
+            console.warn(
+              `Specified CODEX_HOME directory is empty: '${resolved}'. Running without CODEX_HOME.`,
+            );
+          } else {
+            env.CODEX_HOME = resolved;
+          }
+        } catch (e) {
+          // If we cannot read the directory, avoid setting CODEX_HOME.
+          console.warn(
+            `Unable to read CODEX_HOME directory '${resolved}': ${e}. Running without CODEX_HOME.`,
+          );
+        }
+      }
+    } catch (e) {
+      console.warn(
+        `Specified CODEX_HOME path does not exist: '${resolved}'. Running without CODEX_HOME.`,
+      );
+    }
   }
 
   // Pre-flight: ensure Codex binary exists; otherwise the generic ENOENT from Bun
@@ -60,6 +88,13 @@ export async function runCodex(
   }
 
   console.log(`Running Codex: ${JSON.stringify(args)}`);
+  if (env.CODEX_HOME) {
+    console.log(`Using CODEX_HOME='${env.CODEX_HOME}'`);
+  } else {
+    console.log("No CODEX_HOME configured – using Codex defaults.");
+  }
+  console.log(`Prompt file at: ${promptFile}`);
+  console.log(`Last message output path: ${lastMessageOutput}`);
   const result = Bun.spawnSync(args, {
     stdout: "inherit",
     stderr: "inherit",
