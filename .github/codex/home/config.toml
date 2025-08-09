@@ -1,4 +1,1 @@
-# Minimal Codex config to avoid missing file issues.
-# Add project-level defaults or policies here as needed.
-[agent]
-# Example: model = "gpt-5"
+model = "o3"
