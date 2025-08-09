@@ -82,79 +82,18 @@ runs:
 
         # Note that if we start baking version numbers into the artifact name,
         # we will need to update this action.yml file to match.
-        # Candidate triples (prefer musl if available, then fall back to gnu)
-        candidates=("$triple")
-        if [[ "$os" == "linux" && "$arch" == "x86_64" ]]; then
-          # Ensure both musl and gnu are attempted if initial chosen one fails.
-            if [[ "$triple" == "x86_64-unknown-linux-musl" ]]; then
-              candidates+=("x86_64-unknown-linux-gnu")
-            else
-              candidates+=("x86_64-unknown-linux-musl")
-            fi
-        fi
+        artifact="codex-${triple}.tar.gz"
 
         TAG_ARG="${{ inputs.codex_release_tag }}"
-        succeeded="false"
-        for cand in "${candidates[@]}"; do
-          artifact="codex-${cand}.tar.gz"
-          echo "Attempting to download artifact: $artifact"
-          if gh release download ${TAG_ARG:+$TAG_ARG} --repo openai/codex --pattern "$artifact" --output codex-download.tar.gz; then
-            if [[ ! -s codex-download.tar.gz ]]; then
-              echo "Downloaded file is empty for $artifact; trying next candidate" >&2
-              continue
-            fi
-            # Extract single binary to /usr/local/bin/codex
-            tar -xzf codex-download.tar.gz -O > /usr/local/bin/codex || { echo "Extraction failed for $artifact" >&2; continue; }
-            chmod +x /usr/local/bin/codex || true
-            succeeded="true"
-            break
-          else
-            echo "Download failed for $artifact" >&2
-          fi
-        done
+        # The usage is `gh release download [<tag>] [flags]`, so if TAG_ARG
+        # is empty, we do not pass it so we can default to the latest release.
+        gh release download ${TAG_ARG:+$TAG_ARG} --repo openai/codex \
+          --pattern "$artifact" --output - \
+        | tar xzO > /usr/local/bin/codex
+        chmod +x /usr/local/bin/codex
 
-        if [[ "$succeeded" != "true" || ! -x /usr/local/bin/codex ]]; then
-          echo "Failed to obtain Codex binary after trying: ${candidates[*]}" >&2
-          ls -l /usr/local/bin || true
-          exit 1
-        fi
-
-        echo "Codex binary details:";
-        ls -l /usr/local/bin/codex || true
-        file /usr/local/bin/codex || true
-        (command -v sha256sum && sha256sum /usr/local/bin/codex) || true
-        # Display version (may fail if incompatible binary)
-        /usr/local/bin/codex --version || { echo "Warning: failed to get Codex version" >&2; }
-
-    - name: Debug Codex binary and config
-      shell: bash
-      env:
-        INPUT_CODEX_HOME: ${{ inputs.codex_home || ''}}
-      run: |
-        set -euo pipefail
-        echo "GITHUB_WORKSPACE=${GITHUB_WORKSPACE}"
-        echo "---- Codex help/version ----"
-        /usr/local/bin/codex --help || true
-        /usr/local/bin/codex --version || true
-        /usr/local/bin/codex exec --help || true
-        echo "---- .github/codex tree ----"
-        ls -laR "${GITHUB_WORKSPACE}/.github/codex" || echo "No .github/codex directory"
-        echo "---- Resolve CODEX_HOME (if provided) ----"
-        if [[ -n "${INPUT_CODEX_HOME}" ]]; then
-          if [[ "${INPUT_CODEX_HOME}" = /* ]]; then
-            HOME_DIR="${INPUT_CODEX_HOME}"
-          else
-            # Trim leading ./ if present when constructing path
-            HOME_DIR="${GITHUB_WORKSPACE}/${INPUT_CODEX_HOME#./}"
-          fi
-          echo "INPUT_CODEX_HOME=${INPUT_CODEX_HOME}"
-          echo "Resolved CODEX_HOME=${HOME_DIR}"
-          ls -la "${HOME_DIR}" || echo "Resolved CODEX_HOME missing"
-          echo "---- CODEX_HOME contents ----"
-          ls -laR "${HOME_DIR}" || true
-        else
-          echo "INPUT_CODEX_HOME not provided"
-        fi
+        # Display Codex version to confirm binary integrity.
+        codex --version
 
     - name: Install Bun
       uses: oven-sh/setup-bun@v2
